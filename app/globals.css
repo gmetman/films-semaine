@@ -215,29 +215,49 @@ small.o { font-style: italic; }
   gap: 3px;
 }
 
-/* Score badge — white bg, colored number */
+/* Score badge — above the centered bar */
 .gscore {
-  display: inline-block;
+  display: block;
   font-weight: 800;
-  font-size: 18px;
-  line-height: 1;
-  padding: 3px 10px;
-  border-radius: 6px;
-  background: #fff;
-  border: 1px solid #ddd;
-  color: #1c1c1a;
-  align-self: flex-start;
+  font-size: 20px;
+  line-height: 1.1;
 }
 .gscore.pos { color: #1a7f37; }
 .gscore.neg { color: #b3261e; }
 .gscore.zero { color: #9e9e9e; }
 
 @media (prefers-color-scheme: dark) {
-  .gscore { background: #2a2a28; border-color: #3a3a36; color: #ececE6; }
   .gscore.pos { color: #81c784; }
   .gscore.neg { color: #ef9a9a; }
-  .gscore.zero { color: #777; }
+  .gscore.zero { color: #aaa; }
 }
+
+/* Centered family score bar: red left / green right */
+.fam-bar-wrap {
+  position: relative;
+  height: 7px;
+  background: var(--ln);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 3px 0 4px;
+}
+.fam-bar-center {
+  position: absolute;
+  left: calc(50% - 1px);
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--mut);
+  opacity: .4;
+  z-index: 1;
+}
+.fam-bar-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+.fam-pos { background: #1a7f37; left: 50%; }
+.fam-neg { background: #b3261e; right: 50%; }
 
 /* Vote buttons — pill style like tier badges */
 .vote-btn {
@@ -307,8 +327,8 @@ small.o { font-style: italic; }
 .cgrp:last-child { margin-bottom: 0; }
 .cgrp:empty { display: none; }
 
-/* Film title link — inherit text color, underline on hover */
-a.film-title-link { color: var(--fg); }
+/* Film title link */
+a.film-title-link { color: var(--fg); font-size: 15px; font-weight: 700; line-height: 1.25; }
 a.film-title-link:hover { color: var(--ac); }
 
 /* Cinema group item — badge + link icon inline */
