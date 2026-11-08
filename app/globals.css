@@ -206,7 +206,7 @@ small.o { font-style: italic; }
 .btns {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   white-space: normal;
 }
 .btn-grid {
@@ -241,7 +241,7 @@ small.o { font-style: italic; }
   background: var(--ln);
   border-radius: 4px;
   overflow: hidden;
-  margin: 3px 0 4px;
+  margin: 0;
 }
 .fam-bar-center {
   position: absolute;
