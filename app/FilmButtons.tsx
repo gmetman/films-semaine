@@ -3,11 +3,11 @@ import { useProfile, type Choice } from './ProfileContext'
 
 const WEIGHTS: Record<Choice, number> = { prefere: 3, pourquoi_pas: 1, vu: -2, no: -2 }
 
-const ACTIONS: { choice: Choice; icon: string; title: string; color: 'g' | 'r' }[] = [
-  { choice: 'prefere',      icon: '★', title: 'Préféré',       color: 'g' },
-  { choice: 'pourquoi_pas', icon: '?', title: 'Pourquoi pas',  color: 'g' },
-  { choice: 'vu',           icon: '✓', title: 'Déjà vu',       color: 'r' },
-  { choice: 'no',           icon: '✗', title: 'Pas intéressé', color: 'r' },
+const ACTIONS: { choice: Choice; icon: string; label: string; color: 'g' | 'r' }[] = [
+  { choice: 'prefere',      icon: '★', label: 'Préféré',       color: 'g' },
+  { choice: 'pourquoi_pas', icon: '?', label: 'Pourquoi pas',  color: 'g' },
+  { choice: 'vu',           icon: '✓', label: 'Déjà vu',       color: 'r' },
+  { choice: 'no',           icon: '✗', label: 'Pas intéressé', color: 'r' },
 ]
 
 interface Props {
@@ -28,17 +28,18 @@ export default function FilmButtons({ allocineId, weekDate }: Props) {
 
   return (
     <div className="btns">
-      {ACTIONS.map(({ choice, icon, title, color }) => (
-        <button
-          key={choice}
-          className={`b${color}${myChoice === choice ? ' bon' : ''}`}
-          title={title}
-          onClick={() => setChoice(allocineId, weekDate, myChoice === choice ? null : choice)}
-        >
-          {icon} {counts[choice] ?? 0}
-        </button>
-      ))}
-      <span className={`gscore ${scoreClass}`}>{scoreLabel}</span>
+      <div className="btn-grid">
+        {ACTIONS.map(({ choice, icon, label, color }) => (
+          <button
+            key={choice}
+            className={`b${color}${myChoice === choice ? ' bon' : ''}`}
+            onClick={() => setChoice(allocineId, weekDate, myChoice === choice ? null : choice)}
+          >
+            {icon} {label} · {counts[choice] ?? 0}
+          </button>
+        ))}
+      </div>
+      <div className={`gscore ${scoreClass}`}>{scoreLabel}</div>
     </div>
   )
 }

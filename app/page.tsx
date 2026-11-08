@@ -3,6 +3,8 @@ import type { Film, Cinema } from '@/lib/types'
 import { TIER_LABELS, TIER_CSS, scoreBarWidth } from '@/lib/scoring'
 import FilmButtons from './FilmButtons'
 import ProfileSelector from './ProfileSelector'
+import CinemaBadges from './CinemaBadges'
+
 
 export const revalidate = 3600
 
@@ -24,11 +26,6 @@ function formatWeekLabel(isoDate: string): string {
   return `Semaine du mercredi ${fmt.format(d)} au mardi ${fmtEnd.format(end)}`
 }
 
-function cinemaClass(type: Cinema['type']): string {
-  if (type === 'pathe') return 'c p'
-  if (type === 'ugc') return 'c u'
-  return 'c o'
-}
 
 async function getFilms(): Promise<{ films: Film[]; weekDate: string }> {
   const weekDate = getWeekDate()
@@ -152,9 +149,7 @@ export default async function Page() {
 
                     {/* Cinemas */}
                     <td>
-                      {(film.cinemas as Cinema[]).map((c, i) => (
-                        <span key={i} className={cinemaClass(c.type)}>{c.name}{c.note ?? ''}</span>
-                      ))}
+                      <CinemaBadges cinemas={film.cinemas as Cinema[]} />
                     </td>
 
                     {/* Buttons */}

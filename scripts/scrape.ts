@@ -57,6 +57,7 @@ interface FilmEntry {
   press_score: number | null
   audience_score: number | null
   trailer_url: string | null
+  showtimes: Record<string, string[]>  // { "En VF": ["15h45", "17h50"] }
 }
 
 function parseFilmCard($: cheerio.CheerioAPI, card: cheerio.Element): FilmEntry | null {
@@ -116,6 +117,19 @@ function parseFilmCard($: cheerio.CheerioAPI, card: cheerio.Element): FilmEntry 
     ? `https:${posterSrc}`.replace(/r_\d+_\d+/, POSTER_SIZE)
     : null
 
+  // Showtimes: { "En VF": ["15h45", "17h50"], "En VO": [...] }
+  const showtimes: Record<string, string[]> = {}
+  $card.find('.showtimes-version').each((_, ver) => {
+    const $ver = $(ver)
+    const label = $ver.find('.text').text().trim() || 'VF'
+    const times: string[] = []
+    $ver.find('.showtimes-hour-item-value').each((_, t) => {
+      const raw = $(t).text().trim() // e.g. "15:45"
+      if (raw) times.push(raw.replace(':', 'h'))
+    })
+    if (times.length > 0) showtimes[label] = times
+  })
+
   return {
     allocine_id,
     title,
@@ -131,7 +145,8 @@ function parseFilmCard($: cheerio.CheerioAPI, card: cheerio.Element): FilmEntry 
     age_banned,
     press_score,
     audience_score,
-    trailer_url: null, // enriched later if needed
+    trailer_url: null,
+    showtimes,
   }
 }
 
@@ -181,7 +196,7 @@ async function main() {
         if (film.genres.some(g => EXCLUDED_GENRES.includes(g))) continue
 
         const existing = filmMap.get(film.allocine_id)
-        const cinemaEntry: Cinema = { name: cinema.name, type: cinema.type, note: cinema.note }
+        const cinemaEntry: Cinema = { name: cinema.name, type: cinema.type, note: cinema.note, showtimes: film.showtimes }
 
         if (existing) {
           existing.cinemas.push(cinemaEntry)
