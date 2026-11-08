@@ -111,10 +111,12 @@ function parseFilmCard($: cheerio.CheerioAPI, card: cheerio.Element): FilmEntry 
     if (label === 'Spectateurs') audience_score = val
   })
 
-  // Poster URL — convert from r_200_283 to c_160_213
-  const posterSrc = $card.find('img.thumbnail-img').attr('src') || null
-  const poster_url = posterSrc
-    ? `https:${posterSrc}`.replace(/r_\d+_\d+/, POSTER_SIZE)
+  // Poster URL — prefer data-src (lazy-loaded), fall back to src
+  // AlloCiné uses full https:// URLs; don't prefix with 'https:'
+  const imgEl = $card.find('img.thumbnail-img')
+  const posterSrc = imgEl.attr('data-src') || imgEl.attr('src') || null
+  const poster_url = (posterSrc && !posterSrc.startsWith('data:'))
+    ? (posterSrc.startsWith('//') ? `https:${posterSrc}` : posterSrc).replace(/r_\d+_\d+/, POSTER_SIZE)
     : null
 
   // Showtimes: { "En VF": ["15h45", "17h50"], "En VO": [...] }
@@ -244,6 +246,18 @@ async function main() {
 
   // Sort by combined score descending
   rows.sort((a, b) => b.combined_score - a.combined_score)
+
+  // Preserve existing prizes — fetch them before upserting
+  const { data: existingRows } = await supabase
+    .from('weekly_films')
+    .select('allocine_id, prizes')
+    .eq('week_date', week_date)
+  const existingPrizes = new Map(existingRows?.map(r => [r.allocine_id, r.prizes]) ?? [])
+  for (const row of rows) {
+    if (existingPrizes.has(row.allocine_id)) {
+      row.prizes = existingPrizes.get(row.allocine_id) ?? null
+    }
+  }
 
   console.log(`\nUpserting ${rows.length} rows to Supabase...`)
   const { error } = await supabase

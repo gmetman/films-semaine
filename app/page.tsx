@@ -8,6 +8,51 @@ import CinemaBadges from './CinemaBadges'
 
 export const revalidate = 3600
 
+const FESTIVAL_ICONS: [RegExp, string][] = [
+  [/palme d.or/i, '🌴'],
+  [/grand prix/i, '🥇'],
+  [/prix du jury/i, '⚖️'],
+  [/prix d.interpr/i, '🎭'],
+  [/mise en scène/i, '🎬'],
+  [/scénario/i, '✍️'],
+  [/cannes/i, '🌴'],
+  [/annecy/i, '⛵'],
+  [/césar/i, '🏛️'],
+  [/oscar/i, '🏆'],
+  [/ours d.or|berlinale|berlin/i, '🐻'],
+  [/lion d.or|venise|venice/i, '🦁'],
+  [/sundance/i, '❄️'],
+  [/bafta/i, '🎩'],
+  [/toronto|tiff/i, '🍁'],
+  [/deauville/i, '🌊'],
+  [/locarno/i, '🐆'],
+  [/ghent|gand/i, '🔔'],
+  [/briff|bruxelles/i, '🇧🇪'],
+  [/san sebastian/i, '🐚'],
+  [/tribeca/i, '🗽'],
+  [/tauron|horizons/i, '⭐'],
+  [/sélection|selection/i, '🎬'],
+  [/prix|award/i, '🏅'],
+]
+
+function festivalIcon(text: string): string {
+  return FESTIVAL_ICONS.find(([re]) => re.test(text))?.[1] ?? '🏅'
+}
+
+function PrizeLabel({ text }: { text: string }) {
+  const lines = text.split(/\s*[·•\n]\s*/).map(s => s.trim()).filter(Boolean)
+  if (lines.length <= 1) {
+    return <span style={{ fontSize: 12 }}>{festivalIcon(text)} {text}</span>
+  }
+  return (
+    <span style={{ fontSize: 12 }}>
+      {lines.map((l, i) => (
+        <span key={i} style={{ display: 'block' }}>{festivalIcon(l)} {l}</span>
+      ))}
+    </span>
+  )
+}
+
 function getWeekDate(): string {
   const now = new Date()
   const dow = now.getDay()
@@ -76,14 +121,14 @@ export default async function Page() {
               <tr>
                 <th></th>
                 <th>Note /5<br />(P presse · S spect.)</th>
+                <th>Score famille</th>
                 <th>Film</th>
-                <th>Réalisateur · Acteurs</th>
-                <th>Prix</th>
                 <th>
                   Cinémas{' '}
                   <small style={{ display: 'inline' }}>(jaune = Pathé, bleu = UGC)</small>
                 </th>
-                <th></th>
+                <th>Prix</th>
+                <th>Réalisateur · Acteurs</th>
               </tr>
             </thead>
             <tbody>
@@ -92,9 +137,7 @@ export default async function Page() {
                 const tierCss = TIER_CSS[tier]
                 const tierLabel = TIER_LABELS[tier]
                 const barW = scoreBarWidth(film.combined_score)
-                const posterSrc = film.poster_url
-                  ? `/api/poster?url=${encodeURIComponent(film.poster_url)}`
-                  : null
+                const posterSrc = film.poster_url ?? null
 
                 return (
                   <tr key={film.allocine_id}>
@@ -118,6 +161,11 @@ export default async function Page() {
                       </small>
                     </td>
 
+                    {/* Vote buttons + family score */}
+                    <td className="b">
+                      <FilmButtons allocineId={film.allocine_id} weekDate={weekDate} />
+                    </td>
+
                     {/* Film info */}
                     <td className="t">
                       <b>{film.title}</b>{' '}
@@ -138,23 +186,18 @@ export default async function Page() {
                       {film.countries.length > 0 && <small>{film.countries.join(', ')}</small>}
                     </td>
 
-                    {/* Director / Actors */}
-                    <td>
-                      {film.director}
-                      {film.actors.length > 0 && <small>{film.actors.join(', ')}</small>}
-                    </td>
-
-                    {/* Prizes */}
-                    <td>{film.prizes ?? '-'}</td>
-
                     {/* Cinemas */}
                     <td>
                       <CinemaBadges cinemas={film.cinemas as Cinema[]} />
                     </td>
 
-                    {/* Buttons */}
-                    <td className="b">
-                      <FilmButtons allocineId={film.allocine_id} weekDate={weekDate} />
+                    {/* Prizes */}
+                    <td>{film.prizes ? <PrizeLabel text={film.prizes} /> : <span className="n">—</span>}</td>
+
+                    {/* Director / Actors */}
+                    <td>
+                      {film.director}
+                      {film.actors.length > 0 && <small>{film.actors.join(', ')}</small>}
                     </td>
                   </tr>
                 )
