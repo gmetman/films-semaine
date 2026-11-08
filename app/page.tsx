@@ -8,7 +8,7 @@ import FilterButton from './FilterButton'
 import FilmTableWrapper from './FilmTableWrapper'
 
 
-export const revalidate = 3600
+export const revalidate = 300
 
 // Official-style SVG icons for major festivals
 // Cannes: oval border + palm branch (Palme d'Or)

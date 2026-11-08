@@ -347,20 +347,6 @@ async function main() {
     })
   }
 
-  // Apply prize bonus and re-sort
-  // +0.10 per distinct prize (split by ·), capped at +0.40
-  for (const row of rows) {
-    if (row.prizes) {
-      const count = (row.prizes.match(/·/g) ?? []).length + 1
-      const bonus = Math.min(count * 0.10, 0.40)
-      row.combined_score = calculateCombinedScore(row.press_score, row.audience_score, bonus)
-      row.score_tier = getScoreTier(row.combined_score) as ScoreTier
-    }
-  }
-
-  // Sort by combined score descending
-  rows.sort((a, b) => b.combined_score - a.combined_score)
-
   // Fetch prizes from festival palmares pages
   console.log('\nScraping festival palmares...')
   const palmaresPrizes = new Map<string, string>()
@@ -387,6 +373,20 @@ async function main() {
     }
   }
 
+  // Apply prize bonus AFTER prizes are assigned
+  // +0.10 per distinct prize (split by ·), capped at +0.40
+  for (const row of rows) {
+    if (row.prizes) {
+      const count = (row.prizes.match(/·/g) ?? []).length + 1
+      const bonus = Math.min(count * 0.10, 0.40)
+      row.combined_score = calculateCombinedScore(row.press_score, row.audience_score, bonus)
+      row.score_tier = getScoreTier(row.combined_score) as ScoreTier
+    }
+  }
+
+  // Sort by combined score descending
+  rows.sort((a, b) => b.combined_score - a.combined_score)
+
   console.log(`\nUpserting ${rows.length} rows to Supabase...`)
   const { error } = await supabase
     .from('weekly_films')
@@ -400,6 +400,19 @@ async function main() {
   console.log('✓ Done')
   for (const row of rows.slice(0, 5)) {
     console.log(`  ${row.combined_score.toFixed(2)}  ${row.title}`)
+  }
+
+  // Trigger on-demand ISR revalidation so Vercel serves fresh data immediately
+  const appUrl = process.env.APP_URL
+  const secret = process.env.REVALIDATE_SECRET
+  if (appUrl && secret) {
+    try {
+      const res = await fetch(`${appUrl}/api/revalidate?secret=${secret}`, { method: 'POST' })
+      if (res.ok) console.log('✓ Page revalidated')
+      else console.warn('⚠ Revalidation failed:', res.status)
+    } catch (e) {
+      console.warn('⚠ Revalidation skipped (not on Vercel?):', (e as Error).message)
+    }
   }
 }
 
