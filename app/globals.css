@@ -215,31 +215,17 @@ small.o { font-style: italic; }
   gap: 3px;
 }
 
-/* Score badge — above the centered bar */
-.gscore {
-  display: block;
-  font-weight: 800;
-  font-size: 20px;
-  line-height: 1.1;
-}
-.gscore.pos { color: #1a7f37; }
-.gscore.neg { color: #b3261e; }
-.gscore.zero { color: #9e9e9e; }
-
-@media (prefers-color-scheme: dark) {
-  .gscore.pos { color: #81c784; }
-  .gscore.neg { color: #ef9a9a; }
-  .gscore.zero { color: #aaa; }
-}
-
-/* Centered family score bar: red left / green right */
+/* Centered family score bar: red left / green right, number in center */
 .fam-bar-wrap {
   position: relative;
-  height: 7px;
+  height: 20px;
   background: var(--ln);
   border-radius: 4px;
   overflow: hidden;
   margin: 3px 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .fam-bar-center {
   position: absolute;
@@ -258,6 +244,21 @@ small.o { font-style: italic; }
 }
 .fam-pos { background: #1a7f37; left: 50%; }
 .fam-neg { background: #b3261e; right: 50%; }
+.fam-bar-num {
+  position: relative;
+  z-index: 2;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+.fam-bar-num.pos { color: #1a7f37; }
+.fam-bar-num.neg { color: #b3261e; }
+.fam-bar-num.zero { color: var(--mut); }
+
+@media (prefers-color-scheme: dark) {
+  .fam-bar-num.pos { color: #81c784; }
+  .fam-bar-num.neg { color: #ef9a9a; }
+}
 
 /* Vote buttons — pill style like tier badges */
 .vote-btn {
