@@ -24,11 +24,14 @@ interface PalmaresConfig {
 }
 
 const PALMARES_LIST: PalmaresConfig[] = [
-  {
-    festival: 'Cannes',
-    year: 2026,
-    url: 'https://www.allocine.fr/festivals/festival-229/edition-19356942/palmares/',
-  },
+  { festival: 'Cannes',        year: 2026, url: 'https://www.allocine.fr/festivals/festival-229/edition-19356942/palmares/' },
+  { festival: 'Berlinale',     year: 2026, url: 'https://www.allocine.fr/festivals/festival-129/edition-19356897/palmares/' },
+  { festival: 'Mostra Venise', year: 2026, url: 'https://www.allocine.fr/festivals/festival-321/edition-19357100/palmares/' },
+  { festival: 'Deauville',     year: 2026, url: 'https://www.allocine.fr/festivals/festival-330/edition-19356988/palmares/' },
+  { festival: 'Annecy',        year: 2026, url: 'https://www.allocine.fr/festivals/festival-263/edition-19357066/palmares/' },
+  { festival: 'César',         year: 2026, url: 'https://www.allocine.fr/festivals/festival-128/edition-19356863/palmares/' },
+  { festival: 'Oscars',        year: 2026, url: 'https://www.allocine.fr/festivals/festival-146/edition-19356898/palmares/' },
+  { festival: 'Golden Globes', year: 2026, url: 'https://www.allocine.fr/festivals/festival-118/edition-19356806/palmares/' },
 ]
 
 // Known award name patterns to extract from palmares pages
@@ -292,7 +295,13 @@ async function main() {
         if (film.genres.some(g => EXCLUDED_GENRES.includes(g))) continue
 
         const existing = filmMap.get(film.allocine_id)
-        const cinemaEntry: Cinema = { name: cinema.name, type: cinema.type, note: cinema.note, showtimes: film.showtimes }
+        const cinemaEntry: Cinema = {
+          name: cinema.name,
+          type: cinema.type,
+          note: cinema.note,
+          allocine_url: `${ALLOCINE_BASE}/seance/salle_gen_csalle=${cinema.id}.html`,
+          showtimes: film.showtimes,
+        }
 
         if (existing) {
           existing.cinemas.push(cinemaEntry)

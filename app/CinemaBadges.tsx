@@ -20,13 +20,25 @@ function CinemaGroup({ cinemas, open, setOpen }: {
         const hasShowtimes = c.showtimes && Object.keys(c.showtimes).length > 0
         const isOpen = open === c.name
         return (
-          <span key={i}>
+          <span key={i} className="citem">
             <span
               className={`${cinemaClass(c.type)}${hasShowtimes ? ' cs' : ''}`}
               onClick={() => hasShowtimes ? setOpen(isOpen ? null : c.name) : undefined}
             >
               {c.name}{c.note ?? ''}{hasShowtimes ? (isOpen ? ' ▲' : ' ▼') : ''}
             </span>
+            {c.allocine_url && (
+              <a
+                href={c.allocine_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="clink"
+                title="Page AlloCiné du cinéma"
+                onClick={e => e.stopPropagation()}
+              >
+                ↗
+              </a>
+            )}
             {isOpen && c.showtimes && (
               <div className="showt">
                 {Object.entries(c.showtimes).map(([ver, times]) => (
