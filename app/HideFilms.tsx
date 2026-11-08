@@ -9,7 +9,8 @@ export default function HideFilms({ weekDate }: { weekDate: string }) {
     const rows = document.querySelectorAll<HTMLTableRowElement>('tbody tr[data-id]')
     let hidden = 0
     rows.forEach(row => {
-      const isHidden = row.dataset.id! in prefs
+      const c = prefs[row.dataset.id!]
+      const isHidden = c === 'vu' || c === 'no'
       row.classList.toggle('h', isHidden)
       if (isHidden) hidden++
     })

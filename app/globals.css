@@ -186,9 +186,52 @@ small.o { font-style: italic; }
 .av-on .av-i { box-shadow: 0 0 0 2px #fff2; }
 .av-n { font-size: 10px; }
 
-/* Active state for film action buttons */
-button.btn-on {
-  background: var(--ac);
-  color: #fff;
-  border-color: var(--ac);
+/* Film action buttons grid */
+.btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 6px;
+  min-width: 150px;
+}
+.bcell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.vcnt { font-size: 10px; color: var(--mut); font-weight: 600; }
+
+.gscore {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding-top: 2px;
+}
+.gscore.pos { color: #2e7d32; }
+.gscore.neg { color: #b3261e; }
+.gscore.zero { color: var(--mut); }
+
+@media (prefers-color-scheme: dark) {
+  .gscore.pos { color: #81c784; }
+  .gscore.neg { color: #ef9a9a; }
+}
+
+/* Green buttons (Préféré, Pourquoi pas) */
+button.bg { border-color: #2e7d32; color: #2e7d32; }
+button.bg:hover { background: #e8f5e9; border-color: #1b5e20; }
+button.bg.bon { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+
+/* Red buttons (Déjà vu, Pas intéressé) */
+button.br { border-color: #b3261e; color: #b3261e; }
+button.br:hover { background: #fce8e6; border-color: #8c1a14; }
+button.br.bon { background: #b3261e; color: #fff; border-color: #b3261e; }
+
+@media (prefers-color-scheme: dark) {
+  button.bg { border-color: #81c784; color: #81c784; }
+  button.bg:hover { background: #1b2e1c; }
+  button.bg.bon { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+  button.br { border-color: #ef9a9a; color: #ef9a9a; }
+  button.br:hover { background: #2c1a19; }
+  button.br.bon { background: #b3261e; color: #fff; border-color: #b3261e; }
 }

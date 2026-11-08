@@ -1,16 +1,18 @@
 'use client'
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 export const PROFILES = ['Guillaume', 'Pascale', 'Arthur', 'Louise', 'Manon'] as const
 export type Profile = typeof PROFILES[number]
-export type Choice = 'vu' | 'no'
+export type Choice = 'prefere' | 'pourquoi_pas' | 'vu' | 'no'
 export type Prefs = Record<string, Choice>
+export type VoteCounts = Record<string, Partial<Record<Choice, number>>>
 
 interface ProfileCtxValue {
   selected: Profile
   setSelected: (p: Profile) => void
   prefs: Prefs
+  voteCounts: VoteCounts
   setChoice: (allocineId: string, weekDate: string, choice: Choice | null) => Promise<void>
   clearAll: (weekDate: string) => Promise<void>
 }
@@ -22,11 +24,22 @@ const sb = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
+function getWeekDate(): string {
+  const now = new Date()
+  const diff = (now.getDay() + 7 - 3) % 7
+  const wed = new Date(now)
+  wed.setDate(now.getDate() - diff)
+  return wed.toISOString().slice(0, 10)
+}
+
 export function ProfileProvider({ children }: { children: ReactNode }) {
   const [selected, setSelectedState] = useState<Profile>('Guillaume')
   const [prefs, setPrefs] = useState<Prefs>({})
+  const [voteCounts, setVoteCounts] = useState<VoteCounts>({})
+  const prefsRef = useRef<Prefs>({})
+  prefsRef.current = prefs
 
-  // Restore saved profile from localStorage on mount
+  // Restore saved profile on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem('films_profile') as Profile | null
@@ -36,14 +49,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     } catch {}
   }, [])
 
-  // Load preferences from Supabase when profile changes
+  // Load this profile's prefs when profile changes
   useEffect(() => {
-    const now = new Date()
-    const diff = (now.getDay() + 7 - 3) % 7
-    const wed = new Date(now)
-    wed.setDate(now.getDate() - diff)
-    const weekDate = wed.toISOString().slice(0, 10)
-
+    const weekDate = getWeekDate()
     sb.from('user_preferences')
       .select('allocine_id, choice')
       .eq('profile', selected)
@@ -55,33 +63,80 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       })
   }, [selected])
 
+  // Load global vote counts for the week (once, then updated optimistically)
+  useEffect(() => {
+    const weekDate = getWeekDate()
+    sb.from('user_preferences')
+      .select('allocine_id, choice')
+      .eq('week_date', weekDate)
+      .then(({ data }) => {
+        const counts: VoteCounts = {}
+        for (const row of data ?? []) {
+          if (!counts[row.allocine_id]) counts[row.allocine_id] = {}
+          const c = row.choice as Choice
+          counts[row.allocine_id][c] = (counts[row.allocine_id][c] ?? 0) + 1
+        }
+        setVoteCounts(counts)
+      })
+  }, [])
+
   const setSelected = useCallback((p: Profile) => {
     setSelectedState(p)
     try { localStorage.setItem('films_profile', p) } catch {}
   }, [])
 
   const setChoice = useCallback(async (allocineId: string, weekDate: string, choice: Choice | null) => {
+    const prevChoice = prefsRef.current[allocineId]
+
+    // Write to Supabase
     if (choice === null) {
       await sb.from('user_preferences').delete()
         .eq('profile', selected).eq('allocine_id', allocineId).eq('week_date', weekDate)
-      setPrefs(prev => { const n = { ...prev }; delete n[allocineId]; return n })
     } else {
       await sb.from('user_preferences').upsert(
         { profile: selected, allocine_id: allocineId, week_date: weekDate, choice },
         { onConflict: 'profile,allocine_id,week_date' },
       )
-      setPrefs(prev => ({ ...prev, [allocineId]: choice }))
     }
+
+    // Update local prefs
+    setPrefs(prev => {
+      const n = { ...prev }
+      if (choice === null) delete n[allocineId]
+      else n[allocineId] = choice
+      return n
+    })
+
+    // Update vote counts optimistically
+    setVoteCounts(prev => {
+      const film = { ...(prev[allocineId] ?? {}) }
+      if (prevChoice) film[prevChoice] = Math.max(0, (film[prevChoice] ?? 0) - 1)
+      if (choice) film[choice] = (film[choice] ?? 0) + 1
+      return { ...prev, [allocineId]: film }
+    })
   }, [selected])
 
   const clearAll = useCallback(async (weekDate: string) => {
     await sb.from('user_preferences').delete()
       .eq('profile', selected).eq('week_date', weekDate)
+
+    // Remove this profile's votes from counts
+    const currentPrefs = prefsRef.current
+    setVoteCounts(prev => {
+      const next = { ...prev }
+      for (const [id, choice] of Object.entries(currentPrefs)) {
+        if (next[id]) {
+          next[id] = { ...next[id] }
+          next[id][choice] = Math.max(0, (next[id][choice] ?? 0) - 1)
+        }
+      }
+      return next
+    })
     setPrefs({})
   }, [selected])
 
   return (
-    <ProfileCtx.Provider value={{ selected, setSelected, prefs, setChoice, clearAll }}>
+    <ProfileCtx.Provider value={{ selected, setSelected, prefs, voteCounts, setChoice, clearAll }}>
       {children}
     </ProfileCtx.Provider>
   )
