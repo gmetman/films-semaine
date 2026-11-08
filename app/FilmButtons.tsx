@@ -27,7 +27,8 @@ export default function FilmButtons({ allocineId, weekDate }: Props) {
   const scoreClass = globalScore > 0 ? 'pos' : globalScore < 0 ? 'neg' : 'zero'
 
   return (
-    <div className="btns">
+    <div className="btns" data-neg={globalScore <= 0 ? 'true' : undefined}>
+      <div className={`gscore ${scoreClass}`}>{scoreLabel}</div>
       <div className="btn-grid">
         {ACTIONS.map(({ choice, icon, label, color }) => (
           <button
@@ -39,7 +40,6 @@ export default function FilmButtons({ allocineId, weekDate }: Props) {
           </button>
         ))}
       </div>
-      <div className={`gscore ${scoreClass}`}>{scoreLabel}</div>
     </div>
   )
 }

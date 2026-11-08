@@ -202,10 +202,10 @@ small.o { font-style: italic; }
 }
 .showt-ver { color: var(--mut); font-weight: 600; }
 
-/* Film action buttons — 2×2 grid + score box */
+/* Film action buttons — score on top, 2×2 grid below */
 .btns {
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
   gap: 4px;
   white-space: normal;
 }
@@ -229,15 +229,50 @@ small.o { font-style: italic; }
   border-radius: 6px;
   font-weight: 800;
   font-size: 15px;
-  padding: 4px 10px;
+  padding: 3px 8px;
   min-width: 38px;
   white-space: nowrap;
   border: none;
   cursor: default;
+  align-self: flex-start;
 }
 .gscore.pos { color: #81c784; }
 .gscore.neg { color: #ef9a9a; }
 .gscore.zero { color: #888; }
+
+/* Filter button in column header */
+.filter-btn {
+  background: none;
+  border: 1px solid var(--ln);
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  color: var(--mut);
+  vertical-align: middle;
+  margin-left: 4px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.filter-btn:hover { border-color: var(--ac); color: var(--ac); }
+.filter-btn.active { background: var(--ac); border-color: var(--ac); color: #fff; }
+
+/* Hide rows with negative/zero family score when filter is active */
+.filter-neg tr:has([data-neg="true"]) { display: none; }
+
+/* Cinema groups — one row per type */
+.cgrp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.cgrp:last-child { margin-bottom: 0; }
+.cgrp:empty { display: none; }
+
+/* Film title link — inherit text color, underline on hover */
+a.film-title-link { color: var(--fg); }
+a.film-title-link:hover { color: var(--ac); }
 
 /* Green buttons (Préféré, Pourquoi pas) */
 button.bg { border-color: #2e7d32; color: #2e7d32; }

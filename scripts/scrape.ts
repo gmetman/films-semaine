@@ -15,6 +15,100 @@ const ALLOCINE_BASE = 'https://www.allocine.fr'
 const POSTER_SIZE = 'c_160_213'
 const DELAY_MS = 800
 
+// Festival palmares pages to check for prize data
+// Update the edition URL each year as new editions are published
+interface PalmaresConfig {
+  festival: string
+  url: string
+  year: number
+}
+
+const PALMARES_LIST: PalmaresConfig[] = [
+  {
+    festival: 'Cannes',
+    year: 2026,
+    url: 'https://www.allocine.fr/festivals/festival-229/edition-19356942/palmares/',
+  },
+]
+
+// Known award name patterns to extract from palmares pages
+const AWARD_PATTERNS = [
+  /Palme d.Or/i,
+  /Grand Prix/i,
+  /Prix du [Jj]ury/i,
+  /Prix d.interpr[eé]t/i,
+  /Prix de mise en sc[eè]ne/i,
+  /Prix du sc[eé]nario/i,
+  /Mention sp[eé]ciale/i,
+  /Cam[eé]ra d.Or/i,
+  /Un Certain Regard/i,
+  /Cin[eé]fondation/i,
+  /Courts m[eé]trages/i,
+  /Semaine de la Critique/i,
+  /Quinzaine/i,
+  /S[eé]lection/i,
+]
+
+async function scrapePalmares(config: PalmaresConfig): Promise<Map<string, string>> {
+  const prizes = new Map<string, string>()
+  try {
+    const html = await fetchHtml(config.url)
+    const $ = cheerio.load(html)
+
+    // Walk headings and collect film IDs per award section
+    let currentAward = ''
+    const elements: Array<{ tag: string; el: cheerio.Element }> = []
+
+    $('h1,h2,h3,h4,h5,strong,a[href*="cfilm="]').each((_, el) => {
+      elements.push({ tag: el.tagName.toLowerCase(), el })
+    })
+
+    for (const { tag, el } of elements) {
+      if (['h1', 'h2', 'h3', 'h4', 'h5', 'strong'].includes(tag)) {
+        const txt = $(el).text().trim()
+        if (AWARD_PATTERNS.some(re => re.test(txt)) && txt.length < 120) {
+          currentAward = txt
+        }
+      } else if (tag === 'a') {
+        const href = $(el).attr('href') || ''
+        const m = href.match(/cfilm=(\d+)/)
+        if (m && currentAward) {
+          const filmId = m[1]
+          if (!prizes.has(filmId)) {
+            prizes.set(filmId, `${currentAward}, ${config.festival} ${config.year}`)
+          }
+        }
+      }
+    }
+
+    // Fallback: if heading approach found nothing, use text proximity search
+    if (prizes.size === 0) {
+      const rawText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+      const filmLinks = [...html.matchAll(/href="\/film\/fichefilm_gen_cfilm=(\d+)\.html"/g)]
+      for (const lm of filmLinks) {
+        const filmId = lm[1]
+        const pos = lm.index ?? 0
+        const before = rawText.slice(Math.max(0, pos - 400), pos)
+        for (const re of AWARD_PATTERNS) {
+          const am = before.match(new RegExp(`(${re.source}[^|·]{0,80})`, 'i'))
+          if (am) {
+            const award = am[1].trim().slice(0, 80)
+            if (!prizes.has(filmId)) {
+              prizes.set(filmId, `${award}, ${config.festival} ${config.year}`)
+            }
+            break
+          }
+        }
+      }
+    }
+
+    console.log(`  ✓ Palmares ${config.festival} ${config.year}: ${prizes.size} films avec prix`)
+  } catch (err) {
+    console.error(`  ✗ Palmares ${config.festival}:`, err)
+  }
+  return prizes
+}
+
 // Supabase admin client (service role for writes)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -247,6 +341,17 @@ async function main() {
   // Sort by combined score descending
   rows.sort((a, b) => b.combined_score - a.combined_score)
 
+  // Fetch prizes from festival palmares pages
+  console.log('\nScraping festival palmares...')
+  const palmaresPrizes = new Map<string, string>()
+  for (const config of PALMARES_LIST) {
+    const fetched = await scrapePalmares(config)
+    for (const [id, prize] of fetched) {
+      if (!palmaresPrizes.has(id)) palmaresPrizes.set(id, prize)
+    }
+    await sleep(DELAY_MS)
+  }
+
   // Preserve existing prizes — fetch them before upserting
   const { data: existingRows } = await supabase
     .from('weekly_films')
@@ -254,8 +359,11 @@ async function main() {
     .eq('week_date', week_date)
   const existingPrizes = new Map(existingRows?.map(r => [r.allocine_id, r.prizes]) ?? [])
   for (const row of rows) {
-    if (existingPrizes.has(row.allocine_id)) {
+    // Priority: existing manual prizes > freshly scraped palmares prizes > null
+    if (existingPrizes.has(row.allocine_id) && existingPrizes.get(row.allocine_id)) {
       row.prizes = existingPrizes.get(row.allocine_id) ?? null
+    } else if (palmaresPrizes.has(row.allocine_id)) {
+      row.prizes = palmaresPrizes.get(row.allocine_id) ?? null
     }
   }
 

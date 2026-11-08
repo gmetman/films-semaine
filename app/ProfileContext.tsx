@@ -8,11 +8,21 @@ export type Choice = 'prefere' | 'pourquoi_pas' | 'vu' | 'no'
 export type Prefs = Record<string, Choice>
 export type VoteCounts = Record<string, Partial<Record<Choice, number>>>
 
+export const PROFILE_EMAILS: Record<string, Profile> = {
+  'guillaume.metman@ensta.org': 'Guillaume',
+  'pascale.metman@gmail.com': 'Pascale',
+  'arthur.metman@gmail.com': 'Arthur',
+  'louise.metman@gmail.com': 'Louise',
+  'manon.metman@gmail.com': 'Manon',
+}
+
 interface ProfileCtxValue {
   selected: Profile
   setSelected: (p: Profile) => void
   prefs: Prefs
   voteCounts: VoteCounts
+  filterNegative: boolean
+  setFilterNegative: (v: boolean) => void
   setChoice: (allocineId: string, weekDate: string, choice: Choice | null) => Promise<void>
   clearAll: (weekDate: string) => Promise<void>
 }
@@ -36,12 +46,21 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [selected, setSelectedState] = useState<Profile>('Guillaume')
   const [prefs, setPrefs] = useState<Prefs>({})
   const [voteCounts, setVoteCounts] = useState<VoteCounts>({})
+  const [filterNegative, setFilterNegative] = useState(false)
   const prefsRef = useRef<Prefs>({})
   prefsRef.current = prefs
 
-  // Restore saved profile on mount
+  // Restore saved profile on mount; ?email= param takes precedence
   useEffect(() => {
     try {
+      // Check URL param first
+      const params = new URLSearchParams(window.location.search)
+      const emailParam = params.get('email')
+      if (emailParam && PROFILE_EMAILS[emailParam]) {
+        setSelectedState(PROFILE_EMAILS[emailParam])
+        return
+      }
+      // Fall back to localStorage
       const saved = localStorage.getItem('films_profile') as Profile | null
       if (saved && (PROFILES as readonly string[]).includes(saved)) {
         setSelectedState(saved as Profile)
@@ -136,7 +155,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   }, [selected])
 
   return (
-    <ProfileCtx.Provider value={{ selected, setSelected, prefs, voteCounts, setChoice, clearAll }}>
+    <ProfileCtx.Provider value={{ selected, setSelected, prefs, voteCounts, filterNegative, setFilterNegative, setChoice, clearAll }}>
       {children}
     </ProfileCtx.Provider>
   )

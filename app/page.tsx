@@ -4,51 +4,105 @@ import { TIER_LABELS, TIER_CSS, scoreBarWidth } from '@/lib/scoring'
 import FilmButtons from './FilmButtons'
 import ProfileSelector from './ProfileSelector'
 import CinemaBadges from './CinemaBadges'
+import FilterButton from './FilterButton'
+import FilmTableWrapper from './FilmTableWrapper'
 
 
 export const revalidate = 3600
 
-const FESTIVAL_ICONS: [RegExp, string][] = [
-  [/palme d.or/i, '🌴'],
-  [/grand prix/i, '🥇'],
-  [/prix du jury/i, '⚖️'],
-  [/prix d.interpr/i, '🎭'],
-  [/mise en scène/i, '🎬'],
-  [/scénario/i, '✍️'],
-  [/cannes/i, '🌴'],
-  [/annecy/i, '⛵'],
-  [/césar/i, '🏛️'],
-  [/oscar/i, '🏆'],
-  [/ours d.or|berlinale|berlin/i, '🐻'],
-  [/lion d.or|venise|venice/i, '🦁'],
-  [/sundance/i, '❄️'],
-  [/bafta/i, '🎩'],
-  [/toronto|tiff/i, '🍁'],
-  [/deauville/i, '🌊'],
-  [/locarno/i, '🐆'],
-  [/ghent|gand/i, '🔔'],
-  [/briff|bruxelles/i, '🇧🇪'],
-  [/san sebastian/i, '🐚'],
-  [/tribeca/i, '🗽'],
-  [/tauron|horizons/i, '⭐'],
-  [/sélection|selection/i, '🎬'],
-  [/prix|award/i, '🏅'],
-]
+// Inline SVG icons for main festivals
+function PalmIcon() {
+  return (
+    <svg viewBox="0 0 14 18" width="12" height="15" style={{ verticalAlign: 'middle', display: 'inline-block' }}>
+      <path d="M7,17 L7,10" stroke="#B8930A" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      <path d="M7,10 C7,7 6,4 7,1 C7.5,4 8,7 7,10Z" fill="#2E7D32"/>
+      <path d="M7,10 C5,8 3,8 1,6 C3,5 5,7 7,10Z" fill="#2E7D32"/>
+      <path d="M7,10 C5,7 4,5 3,3 C5,3 6,6 7,10Z" fill="#2E7D32" opacity=".85"/>
+      <path d="M7,10 C9,8 11,8 13,6 C11,5 9,7 7,10Z" fill="#2E7D32"/>
+      <path d="M7,10 C9,7 10,5 11,3 C9,3 8,6 7,10Z" fill="#2E7D32" opacity=".85"/>
+      <path d="M7,10 C5,10 3,12 2,14 C4,13 6,11 7,10Z" fill="#2E7D32" opacity=".75"/>
+      <path d="M7,10 C9,10 11,12 12,14 C10,13 8,11 7,10Z" fill="#2E7D32" opacity=".75"/>
+    </svg>
+  )
+}
 
-function festivalIcon(text: string): string {
-  return FESTIVAL_ICONS.find(([re]) => re.test(text))?.[1] ?? '🏅'
+function BearIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="13" height="13" style={{ verticalAlign: 'middle', display: 'inline-block' }}>
+      <circle cx="4" cy="4" r="3" fill="#C62828"/>
+      <circle cx="12" cy="4" r="3" fill="#C62828"/>
+      <ellipse cx="8" cy="10" rx="6" ry="5" fill="#C62828"/>
+      <circle cx="6" cy="8" r="1.2" fill="#fff"/>
+      <circle cx="10" cy="8" r="1.2" fill="#fff"/>
+      <ellipse cx="8" cy="11.5" rx="2.5" ry="1.5" fill="#B71C1C"/>
+    </svg>
+  )
+}
+
+function LionIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="13" height="13" style={{ verticalAlign: 'middle', display: 'inline-block' }}>
+      <circle cx="8" cy="8" r="6.5" fill="#D4A017"/>
+      <circle cx="8" cy="8" r="4" fill="#C68000"/>
+      <circle cx="6.5" cy="7" r="1" fill="#fff"/>
+      <circle cx="9.5" cy="7" r="1" fill="#fff"/>
+      <ellipse cx="8" cy="10" rx="2" ry="1.2" fill="#A05000"/>
+    </svg>
+  )
+}
+
+function CesarIcon() {
+  return (
+    <svg viewBox="0 0 12 18" width="10" height="15" style={{ verticalAlign: 'middle', display: 'inline-block' }}>
+      <ellipse cx="6" cy="4" rx="3" ry="3.5" fill="#9E9E9E"/>
+      <rect x="4.5" y="7" width="3" height="6" rx="1" fill="#757575"/>
+      <path d="M3,13 L6,13 L6,16 L4,16 L3,13Z" fill="#757575"/>
+      <path d="M9,13 L6,13 L6,16 L8,16 L9,13Z" fill="#757575"/>
+    </svg>
+  )
+}
+
+type IconResult = string | React.ReactElement
+
+function festivalIcon(text: string): IconResult {
+  if (/palme d.or/i.test(text)) return <PalmIcon />
+  if (/cannes/i.test(text)) return <PalmIcon />
+  if (/ours d.or|berlinale|berlin/i.test(text)) return <BearIcon />
+  if (/lion d.or|venise|venice/i.test(text)) return <LionIcon />
+  if (/césar/i.test(text)) return <CesarIcon />
+  if (/grand prix/i.test(text)) return '🥇'
+  if (/prix du jury/i.test(text)) return '⚖️'
+  if (/prix d.interpr/i.test(text)) return '🎭'
+  if (/mise en scène/i.test(text)) return '🎬'
+  if (/scénario/i.test(text)) return '✍️'
+  if (/oscar/i.test(text)) return '🏆'
+  if (/sundance/i.test(text)) return '❄️'
+  if (/bafta/i.test(text)) return '🎩'
+  if (/toronto|tiff/i.test(text)) return '🍁'
+  if (/annecy/i.test(text)) return '⛵'
+  if (/deauville/i.test(text)) return '🌊'
+  if (/locarno/i.test(text)) return '🐆'
+  if (/ghent|gand/i.test(text)) return '🔔'
+  if (/briff|bruxelles/i.test(text)) return '🇧🇪'
+  if (/san sebastian/i.test(text)) return '🐚'
+  if (/tauron|horizons/i.test(text)) return '⭐'
+  if (/tribeca/i.test(text)) return '🗽'
+  if (/sélection|selection/i.test(text)) return '🎬'
+  return '🏅'
 }
 
 function PrizeLabel({ text }: { text: string }) {
   const lines = text.split(/\s*[·•\n]\s*/).map(s => s.trim()).filter(Boolean)
   if (lines.length <= 1) {
-    return <span style={{ fontSize: 12 }}>{festivalIcon(text)} {text}</span>
+    const icon = festivalIcon(text)
+    return <span style={{ fontSize: 12 }}>{icon} {text}</span>
   }
   return (
     <span style={{ fontSize: 12 }}>
-      {lines.map((l, i) => (
-        <span key={i} style={{ display: 'block' }}>{festivalIcon(l)} {l}</span>
-      ))}
+      {lines.map((l, i) => {
+        const icon = festivalIcon(l)
+        return <span key={i} style={{ display: 'block' }}>{icon} {l}</span>
+      })}
     </span>
   )
 }
@@ -115,13 +169,13 @@ export default async function Page() {
       {films.length === 0 ? (
         <p className="s" style={{ marginTop: 12 }}>Aucun film pour cette semaine — le scraper n&apos;a pas encore tourné.</p>
       ) : (
-        <div className="w">
+        <FilmTableWrapper>
           <table>
             <thead>
               <tr>
                 <th></th>
                 <th>Note /5<br />(P presse · S spect.)</th>
-                <th>Score famille</th>
+                <th>Score famille <FilterButton /></th>
                 <th>Film</th>
                 <th>
                   Cinémas{' '}
@@ -141,11 +195,13 @@ export default async function Page() {
 
                 return (
                   <tr key={film.allocine_id}>
-                    {/* Poster */}
+                    {/* Poster — click links to AlloCiné */}
                     <td className="pc">
                       {posterSrc ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img className="po" loading="lazy" alt={`Affiche de ${film.title}`} src={posterSrc} />
+                        <a href={film.allocine_url} target="_blank" rel="noopener noreferrer">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img className="po" loading="lazy" alt={`Affiche de ${film.title}`} src={posterSrc} />
+                        </a>
                       ) : (
                         <div className="po" />
                       )}
@@ -166,10 +222,9 @@ export default async function Page() {
                       <FilmButtons allocineId={film.allocine_id} weekDate={weekDate} />
                     </td>
 
-                    {/* Film info */}
+                    {/* Film info — title links to AlloCiné, trailer ▶ separate */}
                     <td className="t">
-                      <b>{film.title}</b>{' '}
-                      <a className="ic" title="Fiche AlloCiné" href={film.allocine_url}>ⓘ</a>
+                      <a href={film.allocine_url} target="_blank" rel="noopener noreferrer" className="film-title-link"><b>{film.title}</b></a>
                       {film.trailer_url && (
                         <a className="ic" title="Bande-annonce" href={film.trailer_url}>▶</a>
                       )}
@@ -204,7 +259,7 @@ export default async function Page() {
               })}
             </tbody>
           </table>
-        </div>
+        </FilmTableWrapper>
       )}
 
       <div className="box">
@@ -213,7 +268,7 @@ export default async function Page() {
         <ul>
           <li>Notes AlloCiné au {dateFormatted}.</li>
           <li>Score famille : ★ Préféré +3 · ? Pourquoi pas +1 · ✓ Déjà vu −2 · ✗ Pas intéressé −2.</li>
-          <li>Prix à saisir manuellement dans Supabase (colonne <code>prizes</code>).</li>
+          <li>Prix : chargés automatiquement depuis AlloCiné lors du scraping hebdomadaire.</li>
           <li>Recommandation pour relecture humaine, pas une conclusion définitive.</li>
         </ul>
       </div>
