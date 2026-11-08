@@ -2,8 +2,10 @@ import { supabase } from '@/lib/supabase'
 import type { Film, Cinema } from '@/lib/types'
 import { TIER_LABELS, TIER_CSS, scoreBarWidth } from '@/lib/scoring'
 import FilmButtons from './FilmButtons'
+import ProfileSelector from './ProfileSelector'
+import HideFilms from './HideFilms'
 
-export const revalidate = 3600  // ISR: re-fetch at most every hour
+export const revalidate = 3600
 
 function getWeekDate(): string {
   const now = new Date()
@@ -64,11 +66,11 @@ export default async function Page() {
           </span>
         </div>
         <div className="perf" />
+        <ProfileSelector />
       </div>
 
       <div id="bar">
-        <span id="cnt" />
-        <a id="rst" style={{ display: 'none' }}>Tout réafficher</a>
+        <HideFilms weekDate={weekDate} />
       </div>
 
       {films.length === 0 ? (
@@ -98,7 +100,7 @@ export default async function Page() {
                 const barW = scoreBarWidth(film.combined_score)
 
                 return (
-                  <tr key={film.allocine_id} data-k={film.title}>
+                  <tr key={film.allocine_id} data-id={film.allocine_id}>
                     {/* Poster */}
                     <td className="pc">
                       {film.poster_url ? (
@@ -108,7 +110,7 @@ export default async function Page() {
                           loading="lazy"
                           alt={`Affiche de ${film.title}`}
                           src={film.poster_url}
-                          onError={undefined}
+                          referrerPolicy="no-referrer"
                         />
                       ) : (
                         <div className="po" />
@@ -173,7 +175,7 @@ export default async function Page() {
 
                     {/* Buttons */}
                     <td className="b">
-                      <FilmButtons />
+                      <FilmButtons allocineId={film.allocine_id} weekDate={weekDate} />
                     </td>
                   </tr>
                 )
@@ -194,32 +196,9 @@ export default async function Page() {
           <li>
             Niveaux de note : Incontournable ≥&nbsp;4,5 · Très bon ≥&nbsp;4,2 · Bon ≥&nbsp;3,9 · Correct en dessous.
           </li>
-          <li>Les boutons « Déjà vu » / « Pas intéressé » mémorisent votre choix dans ce navigateur.</li>
+          <li>Les boutons « Déjà vu » / « Pas intéressé » mémorisent votre choix dans Supabase, par profil.</li>
         </ul>
       </div>
-
-      {/* Client-side script for hide/show logic */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-var K="films_masques",S={};
-try{S=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
-function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
-function ref(){var n=0;document.querySelectorAll("tbody tr").forEach(function(r){var h=!!S[r.dataset.k];r.classList.toggle("h",h);if(h)n++});
-var cnt=document.getElementById("cnt");var rst=document.getElementById("rst");
-if(cnt)cnt.textContent=n+" film(s) masqué(s)";if(rst)rst.style.display=n?"inline":"none"}
-document.addEventListener("click",function(e){
-  var btn=e.target.closest("button[data-a]");
-  if(!btn)return;
-  var key=btn.closest("tr")?.dataset?.k;
-  if(key){S[key]=btn.dataset.a;save();ref();}
-});
-var rst=document.getElementById("rst");
-if(rst)rst.onclick=function(){S={};save();ref()};
-ref();
-`,
-        }}
-      />
     </>
   )
 }

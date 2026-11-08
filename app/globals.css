@@ -146,3 +146,49 @@ i.t4 { background: #8d8d86; }
 .lb.t4 { background: #8d8d86; }
 
 small.o { font-style: italic; }
+
+/* Profile selector */
+.profiles {
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px 10px;
+  border-top: 1px solid #333;
+  flex-wrap: wrap;
+}
+.av {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #b9b4a6;
+  font-size: 11px;
+}
+.av:hover { border-color: #555; }
+.av-on { border-color: var(--avc, #fff) !important; color: #f3efe4; }
+.av-i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--avc, #555);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+.av-on .av-i { box-shadow: 0 0 0 2px #fff2; }
+.av-n { font-size: 10px; }
+
+/* Active state for film action buttons */
+button.btn-on {
+  background: var(--ac);
+  color: #fff;
+  border-color: var(--ac);
+}
