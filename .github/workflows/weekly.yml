@@ -1,0 +1,39 @@
+name: Scrape weekly films
+
+on:
+  schedule:
+    # Every Wednesday at 06:00 Paris time (05:00 UTC in winter, 04:00 UTC in summer)
+    # Using 05:00 UTC as the target — close enough year-round
+    - cron: '0 5 * * 3'
+  workflow_dispatch:
+    inputs:
+      week_date:
+        description: 'Week date override (YYYY-MM-DD, must be a Wednesday)'
+        required: false
+        default: ''
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run scraper
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          DATE="${{ github.event.inputs.week_date }}"
+          if [ -n "$DATE" ]; then
+            npm run scrape -- "$DATE"
+          else
+            npm run scrape
+          fi
