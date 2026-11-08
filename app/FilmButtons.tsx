@@ -34,11 +34,11 @@ export default function FilmButtons({ allocineId, weekDate }: Props) {
 
   return (
     <div className="btns" data-neg={globalScore <= 0 ? 'true' : undefined}>
+      <div className={`fam-score-num ${scoreClass}`}>{scoreLabel}</div>
       <div className="fam-bar-wrap">
         <div className="fam-bar-center" />
         {globalScore > 0 && <div className="fam-bar-fill fam-pos" style={{ width: `${pct}%` }} />}
         {globalScore < 0 && <div className="fam-bar-fill fam-neg" style={{ width: `${pct}%` }} />}
-        <span className={`fam-bar-num ${scoreClass}`}>{scoreLabel}</span>
       </div>
       <div className="btn-grid">
         {ACTIONS.map(({ choice, icon, label, color }) => (

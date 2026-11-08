@@ -220,7 +220,11 @@ async function getFilms(): Promise<{ films: Film[]; weekDate: string }> {
     return { films: [], weekDate }
   }
 
-  return { films: (data ?? []) as Film[], weekDate }
+  const films = ((data ?? []) as Film[]).filter(f =>
+    (f.press_score == null || f.press_score >= 3) &&
+    (f.audience_score == null || f.audience_score >= 3)
+  )
+  return { films, weekDate }
 }
 
 export default async function Page() {
