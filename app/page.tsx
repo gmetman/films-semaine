@@ -3,7 +3,6 @@ import type { Film, Cinema } from '@/lib/types'
 import { TIER_LABELS, TIER_CSS, scoreBarWidth } from '@/lib/scoring'
 import FilmButtons from './FilmButtons'
 import ProfileSelector from './ProfileSelector'
-import HideFilms from './HideFilms'
 
 export const revalidate = 3600
 
@@ -60,21 +59,19 @@ export default async function Page() {
       <div className="film">
         <div className="perf" />
         <div className="ttl">
-          <h1>🎬 FILMS À VOIR CETTE SEMAINE</h1>
-          <span className="sub">
-            {weekLabel} · vos cinémas · hors épouvante/horreur · tri par note combinée
-          </span>
+          <div className="ttl-left">
+            <h1>🎬 FILMS À VOIR CETTE SEMAINE</h1>
+            <span className="sub">
+              {weekLabel} · vos cinémas · hors épouvante/horreur · tri par note combinée
+            </span>
+          </div>
+          <ProfileSelector />
         </div>
         <div className="perf" />
-        <ProfileSelector />
-      </div>
-
-      <div id="bar">
-        <HideFilms weekDate={weekDate} />
       </div>
 
       {films.length === 0 ? (
-        <p className="s">Aucun film pour cette semaine — le scraper n&apos;a pas encore tourné.</p>
+        <p className="s" style={{ marginTop: 12 }}>Aucun film pour cette semaine — le scraper n&apos;a pas encore tourné.</p>
       ) : (
         <div className="w">
           <table>
@@ -98,20 +95,17 @@ export default async function Page() {
                 const tierCss = TIER_CSS[tier]
                 const tierLabel = TIER_LABELS[tier]
                 const barW = scoreBarWidth(film.combined_score)
+                const posterSrc = film.poster_url
+                  ? `/api/poster?url=${encodeURIComponent(film.poster_url)}`
+                  : null
 
                 return (
-                  <tr key={film.allocine_id} data-id={film.allocine_id}>
+                  <tr key={film.allocine_id}>
                     {/* Poster */}
                     <td className="pc">
-                      {film.poster_url ? (
+                      {posterSrc ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          className="po"
-                          loading="lazy"
-                          alt={`Affiche de ${film.title}`}
-                          src={film.poster_url}
-                          referrerPolicy="no-referrer"
-                        />
+                        <img className="po" loading="lazy" alt={`Affiche de ${film.title}`} src={posterSrc} />
                       ) : (
                         <div className="po" />
                       )}
@@ -137,28 +131,20 @@ export default async function Page() {
                       {film.original_title && (
                         <small className="o">Titre original : {film.original_title}</small>
                       )}
-                      <small>
-                        {[film.year, film.duration].filter(Boolean).join(' · ')}
-                      </small>
+                      <small>{[film.year, film.duration].filter(Boolean).join(' · ')}</small>
                       <small>
                         {film.genres.join(', ')}{' '}
                         {film.age_rating && (
-                          <span className={`rs${film.age_banned ? ' ban' : ''}`}>
-                            · {film.age_rating}
-                          </span>
+                          <span className={`rs${film.age_banned ? ' ban' : ''}`}>· {film.age_rating}</span>
                         )}
                       </small>
-                      {film.countries.length > 0 && (
-                        <small>{film.countries.join(', ')}</small>
-                      )}
+                      {film.countries.length > 0 && <small>{film.countries.join(', ')}</small>}
                     </td>
 
                     {/* Director / Actors */}
                     <td>
                       {film.director}
-                      {film.actors.length > 0 && (
-                        <small>{film.actors.join(', ')}</small>
-                      )}
+                      {film.actors.length > 0 && <small>{film.actors.join(', ')}</small>}
                     </td>
 
                     {/* Prizes */}
@@ -167,9 +153,7 @@ export default async function Page() {
                     {/* Cinemas */}
                     <td>
                       {(film.cinemas as Cinema[]).map((c, i) => (
-                        <span key={i} className={cinemaClass(c.type)}>
-                          {c.name}{c.note ?? ''}
-                        </span>
+                        <span key={i} className={cinemaClass(c.type)}>{c.name}{c.note ?? ''}</span>
                       ))}
                     </td>
 
@@ -187,16 +171,12 @@ export default async function Page() {
 
       <div className="box">
         <b>Méthode</b> : note combinée = 60&nbsp;% presse AlloCiné + 40&nbsp;% spectateurs AlloCiné
-        (sur 5), plus un bonus prix plafonné à +0,40 (+0,30 prix majeur Cannes/Venise/Berlin/Oscars/César&nbsp;;
-        +0,20 autre grand festival&nbsp;; +0,05 par distinction ou sélection supplémentaire).
+        (sur 5), plus un bonus prix plafonné à +0,40.
         <ul>
-          <li>Notes AlloCiné au {dateFormatted}. * = page du cinéma datée de quelques jours : vérifier les horaires.</li>
+          <li>Notes AlloCiné au {dateFormatted}.</li>
+          <li>Score famille : ★ Préféré +3 · ? Pourquoi pas +1 · ✓ Déjà vu −2 · ✗ Pas intéressé −2.</li>
           <li>Prix à saisir manuellement dans Supabase (colonne <code>prizes</code>).</li>
           <li>Recommandation pour relecture humaine, pas une conclusion définitive.</li>
-          <li>
-            Niveaux de note : Incontournable ≥&nbsp;4,5 · Très bon ≥&nbsp;4,2 · Bon ≥&nbsp;3,9 · Correct en dessous.
-          </li>
-          <li>Les boutons « Déjà vu » / « Pas intéressé » mémorisent votre choix dans Supabase, par profil.</li>
         </ul>
       </div>
     </>

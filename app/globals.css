@@ -53,12 +53,9 @@ button {
   color: var(--fg);
   border-radius: 6px;
   padding: 3px 7px;
-  margin-right: 3px;
   cursor: pointer;
 }
 button:hover { border-color: var(--ac); }
-
-tr.h { display: none; }
 
 .box {
   background: var(--hd);
@@ -68,9 +65,6 @@ tr.h { display: none; }
   font-size: 12px;
 }
 .box ul { margin: 4px 0 0 18px; padding: 0; }
-
-#bar { color: var(--mut); margin-bottom: 8px; }
-#bar a { cursor: pointer; }
 
 .c {
   display: inline-block;
@@ -84,6 +78,7 @@ tr.h { display: none; }
 .c.u { background: #1e5bd8; color: #fff; }
 .c.o { background: var(--hd); border: 1px solid var(--ln); }
 
+/* Header banner */
 .film {
   background: #141414;
   border-radius: 6px;
@@ -98,17 +93,57 @@ tr.h { display: none; }
 }
 .film .ttl {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 8px 14px;
   color: #f3efe4;
   border-top: 1px solid #333;
   border-bottom: 1px solid #333;
-  flex-wrap: wrap;
 }
+.ttl-left { flex: 1; min-width: 0; }
 .film h1 { color: #f3efe4; font-size: 20px; margin: 0; letter-spacing: .04em; }
 .film .sub { color: #b9b4a6; font-size: 12px; }
 
+/* Profile selector — compact, right side of header */
+.profiles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.av {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 3px 6px 3px 3px;
+  cursor: pointer;
+  color: #b9b4a6;
+  font-size: 11px;
+  line-height: 1;
+}
+.av:hover { border-color: #555; }
+.av-on { border-color: var(--avc, #fff); color: #f3efe4; }
+.av-i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--avc, #555);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.av-on .av-i { box-shadow: 0 0 0 2px rgba(255,255,255,.25); }
+.av-n { font-size: 11px; font-weight: 600; white-space: nowrap; }
+
+/* Poster */
 td.pc { width: 64px; padding: 6px 4px 6px 8px; }
 img.po {
   width: 56px;
@@ -119,6 +154,7 @@ img.po {
   display: block;
 }
 
+/* Score column */
 td.sc { min-width: 92px; }
 .num { display: block; font-weight: 800; font-size: 20px; line-height: 1.1; }
 .bar { display: block; height: 7px; border-radius: 4px; background: var(--ln); margin: 4px 0 3px; overflow: hidden; }
@@ -147,71 +183,12 @@ i.t4 { background: #8d8d86; }
 
 small.o { font-style: italic; }
 
-/* Profile selector */
-.profiles {
-  display: flex;
-  gap: 8px;
-  padding: 8px 14px 10px;
-  border-top: 1px solid #333;
-  flex-wrap: wrap;
-}
-.av {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  background: none;
-  border: 2px solid transparent;
-  border-radius: 10px;
-  padding: 4px 8px;
-  cursor: pointer;
-  color: #b9b4a6;
-  font-size: 11px;
-}
-.av:hover { border-color: #555; }
-.av-on { border-color: var(--avc, #fff) !important; color: #f3efe4; }
-.av-i {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--avc, #555);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1;
-}
-.av-on .av-i { box-shadow: 0 0 0 2px #fff2; }
-.av-n { font-size: 10px; }
-
-/* Film action buttons grid */
-.btns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 6px;
-  min-width: 150px;
-}
-.bcell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-.vcnt { font-size: 10px; color: var(--mut); font-weight: 600; }
-
-.gscore {
-  grid-column: 1 / -1;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 700;
-  padding-top: 2px;
-}
+/* Film action buttons — compact horizontal row */
+.btns { display: flex; align-items: center; gap: 3px; }
+.gscore { font-size: 11px; font-weight: 700; margin-left: 4px; white-space: nowrap; }
 .gscore.pos { color: #2e7d32; }
 .gscore.neg { color: #b3261e; }
 .gscore.zero { color: var(--mut); }
-
 @media (prefers-color-scheme: dark) {
   .gscore.pos { color: #81c784; }
   .gscore.neg { color: #ef9a9a; }

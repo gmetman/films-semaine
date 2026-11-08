@@ -23,7 +23,7 @@ export default function ProfileSelector() {
           style={{ '--avc': COLORS[p] } as React.CSSProperties}
         >
           <span className="av-i">{p[0]}</span>
-          <span className="av-n">{p}</span>
+          {selected === p && <span className="av-n">{p}</span>}
         </button>
       ))}
     </div>
