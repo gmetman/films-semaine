@@ -6,6 +6,7 @@
 
 import * as cheerio from 'cheerio'
 import { createClient } from '@supabase/supabase-js'
+import ws from 'ws'
 import { CINEMAS, EXCLUDED_GENRES, type CinemaConfig } from '../lib/cinemas.js'
 import { calculateCombinedScore, getScoreTier } from '../lib/scoring.js'
 import type { Film, Cinema } from '../lib/types.js'
@@ -18,7 +19,10 @@ const DELAY_MS = 800
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } },
+  {
+    auth: { autoRefreshToken: false, persistSession: false },
+    realtime: { transport: ws as unknown as typeof WebSocket },
+  },
 )
 
 function sleep(ms: number) {
