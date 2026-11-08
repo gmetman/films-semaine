@@ -5,7 +5,7 @@ const WEIGHTS: Record<Choice, number> = { prefere: 3, pourquoi_pas: 1, vu: -2, n
 
 const ACTIONS: { choice: Choice; icon: string; label: string; color: 'g' | 'r' }[] = [
   { choice: 'prefere',      icon: '★', label: 'Préféré',   color: 'g' },
-  { choice: 'pourquoi_pas', icon: '?', label: 'P.pas',     color: 'g' },
+  { choice: 'pourquoi_pas', icon: '?', label: 'Oui…',      color: 'g' },
   { choice: 'vu',           icon: '✓', label: 'Vu',        color: 'r' },
   { choice: 'no',           icon: '✗', label: 'Non',       color: 'r' },
 ]
@@ -33,7 +33,7 @@ export default function FilmButtons({ allocineId, weekDate }: Props) {
         {ACTIONS.map(({ choice, icon, label, color }) => (
           <button
             key={choice}
-            title={choice === 'prefere' ? 'Préféré (+3)' : choice === 'pourquoi_pas' ? 'Pourquoi pas (+1)' : choice === 'vu' ? 'Déjà vu (-2)' : 'Pas intéressé (-2)'}
+            title={choice === 'prefere' ? 'Préféré (+3)' : choice === 'pourquoi_pas' ? 'Oui… / Pourquoi pas (+1)' : choice === 'vu' ? 'Déjà vu (-2)' : 'Pas intéressé (-2)'}
             className={`vote-btn b${color}${myChoice === choice ? ' bon' : ''}`}
             onClick={() => setChoice(allocineId, weekDate, myChoice === choice ? null : choice)}
           >

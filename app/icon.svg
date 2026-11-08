@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="5" fill="#141414"/>
+  <!-- Clapper bar: white base + diagonal black stripes -->
+  <clipPath id="cl">
+    <rect x="3" y="3" width="26" height="10" rx="2"/>
+  </clipPath>
+  <rect x="3" y="3" width="26" height="10" rx="2" fill="#f0ede4"/>
+  <g clip-path="url(#cl)">
+    <line x1="2"  y1="13" x2="10" y2="3" stroke="#141414" stroke-width="5"/>
+    <line x1="10" y1="13" x2="18" y2="3" stroke="#141414" stroke-width="5"/>
+    <line x1="18" y1="13" x2="26" y2="3" stroke="#141414" stroke-width="5"/>
+    <line x1="26" y1="13" x2="34" y2="3" stroke="#141414" stroke-width="5"/>
+  </g>
+  <!-- Pivot bar -->
+  <rect x="3" y="11.5" width="26" height="2.5" fill="#555"/>
+  <!-- White board -->
+  <rect x="3" y="16" width="26" height="13" rx="2" fill="#f0ede4"/>
+  <!-- Ruled lines (like a production slate) -->
+  <rect x="7" y="19"   width="10" height="1.5" rx=".75" fill="#c0bdb4"/>
+  <rect x="7" y="22.5" width="16" height="1.5" rx=".75" fill="#c0bdb4"/>
+  <rect x="7" y="26"   width="11" height="1.5" rx=".75" fill="#c0bdb4"/>
+</svg>

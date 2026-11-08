@@ -1,6 +1,12 @@
 'use client'
 import { useState } from 'react'
 import type { Cinema } from '@/lib/types'
+import { CINEMAS } from '@/lib/cinemas'
+
+// Fallback: build URL from name when allocine_url not in stored data (old records)
+const CINEMA_URL: Record<string, string> = Object.fromEntries(
+  CINEMAS.map(c => [c.name, `https://www.allocine.fr/seance/salle_gen_csalle=${c.id}.html`])
+)
 
 function cinemaClass(type: Cinema['type']): string {
   if (type === 'pathe') return 'c p'
@@ -27,9 +33,9 @@ function CinemaGroup({ cinemas, open, setOpen }: {
             >
               {c.name}{c.note ?? ''}{hasShowtimes ? (isOpen ? ' ▲' : ' ▼') : ''}
             </span>
-            {c.allocine_url && (
+            {(c.allocine_url ?? CINEMA_URL[c.name]) && (
               <a
-                href={c.allocine_url}
+                href={c.allocine_url ?? CINEMA_URL[c.name]}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="clink"

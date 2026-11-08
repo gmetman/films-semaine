@@ -345,10 +345,10 @@ export default async function Page() {
 
       <div className="box">
         <b>Méthode</b> : note combinée = 60&nbsp;% presse AlloCiné + 40&nbsp;% spectateurs AlloCiné
-        (sur 5), plus un bonus prix plafonné à +0,40.
+        (sur 5) + bonus prix (+0,10 par prix, plafonné à +0,40).
         <ul>
           <li>Notes AlloCiné au {dateFormatted}.</li>
-          <li>Score famille : ★ Préféré +3 · ? Pourquoi pas +1 · ✓ Déjà vu −2 · ✗ Pas intéressé −2.</li>
+          <li>Score famille : ★ Préféré +3 · ? Oui… +1 · ✓ Déjà vu −2 · ✗ Pas intéressé −2.</li>
           <li>Prix : chargés automatiquement depuis AlloCiné lors du scraping hebdomadaire.</li>
           <li>Recommandation pour relecture humaine, pas une conclusion définitive.</li>
         </ul>

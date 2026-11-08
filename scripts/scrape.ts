@@ -8,7 +8,7 @@ import * as cheerio from 'cheerio'
 import { createClient } from '@supabase/supabase-js'
 import ws from 'ws'
 import { CINEMAS, EXCLUDED_GENRES, type CinemaConfig } from '../lib/cinemas.js'
-import { calculateCombinedScore, getScoreTier } from '../lib/scoring.js'
+import { calculateCombinedScore, getScoreTier, type ScoreTier } from '../lib/scoring.js'
 import type { Film, Cinema } from '../lib/types.js'
 
 const ALLOCINE_BASE = 'https://www.allocine.fr'
@@ -345,6 +345,17 @@ async function main() {
       trailer_url: null,
       cinemas,
     })
+  }
+
+  // Apply prize bonus and re-sort
+  // +0.10 per distinct prize (split by ·), capped at +0.40
+  for (const row of rows) {
+    if (row.prizes) {
+      const count = (row.prizes.match(/·/g) ?? []).length + 1
+      const bonus = Math.min(count * 0.10, 0.40)
+      row.combined_score = calculateCombinedScore(row.press_score, row.audience_score, bonus)
+      row.score_tier = getScoreTier(row.combined_score) as ScoreTier
+    }
   }
 
   // Sort by combined score descending
