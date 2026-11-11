@@ -402,6 +402,34 @@ async function main() {
     console.log(`  ${row.combined_score.toFixed(2)}  ${row.title}`)
   }
 
+  // Carry over family votes from previous week for matching films
+  const prevDate = new Date(week_date + 'T12:00:00')
+  prevDate.setDate(prevDate.getDate() - 7)
+  const prevWeek = prevDate.toISOString().split('T')[0]
+  const currentIds = rows.map(r => r.allocine_id)
+
+  const { data: prevPrefs } = await supabase
+    .from('user_preferences')
+    .select('profile, allocine_id, choice')
+    .eq('week_date', prevWeek)
+    .in('allocine_id', currentIds)
+
+  if (prevPrefs && prevPrefs.length > 0) {
+    const carryover = prevPrefs.map(p => ({
+      profile: p.profile,
+      allocine_id: p.allocine_id,
+      week_date,
+      choice: p.choice,
+    }))
+    const { error: carryErr } = await supabase
+      .from('user_preferences')
+      .upsert(carryover, { onConflict: 'profile,allocine_id,week_date', ignoreDuplicates: true })
+    if (carryErr) console.warn('⚠ Vote carryover error:', carryErr.message)
+    else console.log(`✓ Carried over ${carryover.length} votes from ${prevWeek}`)
+  } else {
+    console.log(`  (no votes to carry over from ${prevWeek})`)
+  }
+
   // Trigger on-demand ISR revalidation so Vercel serves fresh data immediately
   const appUrl = process.env.APP_URL
   const secret = process.env.REVALIDATE_SECRET

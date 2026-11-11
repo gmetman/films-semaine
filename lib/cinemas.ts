@@ -9,6 +9,8 @@ export const CINEMAS: CinemaConfig[] = [
   { id: 'C0161', name: 'Convention', type: 'pathe' },
   { id: 'C0159', name: 'Ciné Cité Les Halles', type: 'ugc' },
   { id: 'C0025', name: '7 Parnassiens', type: 'other' },
+  { id: 'C0092', name: 'MK2 Odéon St Michel', type: 'other' },
+  { id: 'C0097', name: 'MK2 Odéon St Germain', type: 'other' },
   { id: 'C0104', name: 'UGC Odéon', type: 'ugc', note: '*' },
   { id: 'C0105', name: 'UGC Rotonde', type: 'ugc', note: '*' },
   { id: 'W7502', name: 'Beaugrenelle', type: 'pathe' },

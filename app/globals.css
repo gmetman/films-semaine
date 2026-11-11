@@ -337,6 +337,16 @@ a.film-title-link:hover { color: var(--ac); }
 
 /* Cinema group item — badge + link icon inline */
 .citem { display: inline-flex; align-items: baseline; gap: 1px; }
+
+/* All-cinemas showtime panel */
+.showt-all {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 2px;
+}
+.showt-cinema { display: flex; flex-direction: column; gap: 2px; }
+.showt-cname { font-size: 11px; font-weight: 700; color: var(--fg); }
 .clink {
   font-size: 10px;
   color: var(--mut);

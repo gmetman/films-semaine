@@ -14,66 +14,74 @@ function cinemaClass(type: Cinema['type']): string {
   return 'c o'
 }
 
-function CinemaGroup({ cinemas, open, setOpen }: {
+function CinemaGroup({ cinemas, hasAnyShowtimes, open, onToggle }: {
   cinemas: Cinema[]
-  open: string | null
-  setOpen: (name: string | null) => void
+  hasAnyShowtimes: boolean
+  open: boolean
+  onToggle: () => void
 }) {
   if (cinemas.length === 0) return null
   return (
     <div className="cgrp">
-      {cinemas.map((c, i) => {
-        const hasShowtimes = c.showtimes && Object.keys(c.showtimes).length > 0
-        const isOpen = open === c.name
-        return (
-          <span key={i} className="citem">
-            <span
-              className={`${cinemaClass(c.type)}${hasShowtimes ? ' cs' : ''}`}
-              onClick={() => hasShowtimes ? setOpen(isOpen ? null : c.name) : undefined}
-            >
-              {c.name}{c.note ?? ''}{hasShowtimes ? (isOpen ? ' ▲' : ' ▼') : ''}
-            </span>
-            {(c.allocine_url ?? CINEMA_URL[c.name]) && (
-              <a
-                href={c.allocine_url ?? CINEMA_URL[c.name]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="clink"
-                title="Page AlloCiné du cinéma"
-                onClick={e => e.stopPropagation()}
-              >
-                ↗
-              </a>
-            )}
-            {isOpen && c.showtimes && (
-              <div className="showt">
-                {Object.entries(c.showtimes).map(([ver, times]) => (
-                  <span key={ver}>
-                    <span className="showt-ver">{ver} :</span>{' '}
-                    {times.join(' · ')}
-                  </span>
-                ))}
-              </div>
-            )}
+      {cinemas.map((c, i) => (
+        <span key={i} className="citem">
+          <span
+            className={`${cinemaClass(c.type)}${hasAnyShowtimes ? ' cs' : ''}`}
+            onClick={() => hasAnyShowtimes ? onToggle() : undefined}
+          >
+            {c.name}{c.note ?? ''}{hasAnyShowtimes ? (open ? ' ▲' : ' ▼') : ''}
           </span>
-        )
-      })}
+          {(c.allocine_url ?? CINEMA_URL[c.name]) && (
+            <a
+              href={c.allocine_url ?? CINEMA_URL[c.name]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="clink"
+              title="Page AlloCiné du cinéma"
+              onClick={e => e.stopPropagation()}
+            >
+              ↗
+            </a>
+          )}
+        </span>
+      ))}
     </div>
   )
 }
 
 export default function CinemaBadges({ cinemas }: { cinemas: Cinema[] }) {
-  const [open, setOpen] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
 
+  const hasAnyShowtimes = cinemas.some(c => c.showtimes && Object.keys(c.showtimes).length > 0)
   const pathe = cinemas.filter(c => c.type === 'pathe')
   const ugc = cinemas.filter(c => c.type === 'ugc')
   const others = cinemas.filter(c => c.type !== 'pathe' && c.type !== 'ugc')
+  const toggle = () => setOpen(o => !o)
 
   return (
     <div>
-      <CinemaGroup cinemas={pathe} open={open} setOpen={setOpen} />
-      <CinemaGroup cinemas={ugc} open={open} setOpen={setOpen} />
-      <CinemaGroup cinemas={others} open={open} setOpen={setOpen} />
+      <CinemaGroup cinemas={pathe} hasAnyShowtimes={hasAnyShowtimes} open={open} onToggle={toggle} />
+      <CinemaGroup cinemas={ugc} hasAnyShowtimes={hasAnyShowtimes} open={open} onToggle={toggle} />
+      <CinemaGroup cinemas={others} hasAnyShowtimes={hasAnyShowtimes} open={open} onToggle={toggle} />
+      {open && (
+        <div className="showt-all">
+          {cinemas
+            .filter(c => c.showtimes && Object.keys(c.showtimes).length > 0)
+            .map((c, i) => (
+              <div key={i} className="showt-cinema">
+                <div className="showt-cname">{c.name}</div>
+                <div className="showt">
+                  {Object.entries(c.showtimes!).map(([ver, times]) => (
+                    <span key={ver}>
+                      <span className="showt-ver">{ver} :</span>{' '}
+                      {times.join(' · ')}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   )
 }
