@@ -76,9 +76,10 @@ button:hover { border-color: var(--ac); }
   font-size: 12px;
   white-space: nowrap;
 }
-.c.p { background: #ffd400; color: #1c1c1a; }
-.c.u { background: #1e5bd8; color: #fff; }
-.c.o { background: var(--hd); border: 1px solid var(--ln); }
+.c.p  { background: #ffd400; color: #1c1c1a; }
+.c.u  { background: #1e5bd8; color: #fff; }
+.c.mk { background: #c0392b; color: #fff; }
+.c.o  { background: var(--hd); border: 1px solid var(--ln); }
 
 /* Header banner */
 .film {
@@ -345,8 +346,7 @@ a.film-title-link:hover { color: var(--ac); }
   gap: 6px;
   margin: 4px 0 2px;
 }
-.showt-cinema { display: flex; flex-direction: column; gap: 2px; }
-.showt-cname { font-size: 11px; font-weight: 700; color: var(--fg); }
+.showt-cinema { display: flex; flex-direction: column; gap: 3px; }
 .clink {
   font-size: 10px;
   color: var(--mut);

@@ -11,6 +11,7 @@ const CINEMA_URL: Record<string, string> = Object.fromEntries(
 function cinemaClass(type: Cinema['type']): string {
   if (type === 'pathe') return 'c p'
   if (type === 'ugc') return 'c u'
+  if (type === 'mk2') return 'c mk'
   return 'c o'
 }
 
@@ -69,7 +70,7 @@ export default function CinemaBadges({ cinemas }: { cinemas: Cinema[] }) {
             .filter(c => c.showtimes && Object.keys(c.showtimes).length > 0)
             .map((c, i) => (
               <div key={i} className="showt-cinema">
-                <div className="showt-cname">{c.name}</div>
+                <span className={cinemaClass(c.type)}>{c.name}{c.note ?? ''}</span>
                 <div className="showt">
                   {Object.entries(c.showtimes!).map(([ver, times]) => (
                     <span key={ver}>

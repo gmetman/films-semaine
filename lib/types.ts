@@ -1,6 +1,6 @@
 export interface Cinema {
   name: string
-  type: 'pathe' | 'ugc' | 'other'
+  type: 'pathe' | 'ugc' | 'mk2' | 'other'
   note?: string
   allocine_url?: string
   showtimes?: Record<string, string[]>  // e.g. { "En VF": ["15h45", "17h50"] }
