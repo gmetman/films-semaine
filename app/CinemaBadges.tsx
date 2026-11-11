@@ -14,28 +14,35 @@ function cinemaClass(type: Cinema['type']): string {
   return 'c o'
 }
 
+function CinemaBadge({ c }: { c: Cinema }) {
+  const url = c.allocine_url ?? CINEMA_URL[c.name]
+  const cls = `${cinemaClass(c.type)} cb`
+  const label = `${c.name}${c.note ?? ''}`
+  if (url) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" className={cls} title="Page AlloCiné du cinéma" onClick={e => e.stopPropagation()}>
+        {label}
+      </a>
+    )
+  }
+  return <span className={cls}>{label}</span>
+}
+
 export default function CinemaBadges({ cinemas }: { cinemas: Cinema[] }) {
   const [open, setOpen] = useState(false)
 
   const hasAnyShowtimes = cinemas.some(c => c.showtimes && Object.keys(c.showtimes).length > 0)
 
   if (open) {
-    // Expanded: one row per cinema — badge + link + times on the same line
     return (
       <div className="showt-expanded">
         <button className="showt-toggle" onClick={() => setOpen(false)}>Horaires ▲</button>
         {cinemas.map((c, i) => {
-          const url = c.allocine_url ?? CINEMA_URL[c.name]
           const versions = c.showtimes ? Object.entries(c.showtimes) : []
           const multiVer = versions.length > 1
           return (
             <div key={i} className="showt-row">
-              <span className="citem">
-                <span className={cinemaClass(c.type)}>{c.name}{c.note ?? ''}</span>
-                {url && (
-                  <a href={url} target="_blank" rel="noopener noreferrer" className="clink" title="Page AlloCiné du cinéma" onClick={e => e.stopPropagation()}>↗</a>
-                )}
-              </span>
+              <CinemaBadge c={c} />
               {versions.length > 0 && (
                 <span className="showt-times">
                   {versions.map(([ver, times], vi) => (
@@ -54,7 +61,6 @@ export default function CinemaBadges({ cinemas }: { cinemas: Cinema[] }) {
     )
   }
 
-  // Collapsed: badges grouped by type, all inline
   const pathe  = cinemas.filter(c => c.type === 'pathe')
   const ugc    = cinemas.filter(c => c.type === 'ugc')
   const mk2    = cinemas.filter(c => c.type === 'mk2')
@@ -64,17 +70,7 @@ export default function CinemaBadges({ cinemas }: { cinemas: Cinema[] }) {
     if (group.length === 0) return null
     return (
       <div className="cgrp">
-        {group.map((c, i) => {
-          const url = c.allocine_url ?? CINEMA_URL[c.name]
-          return (
-            <span key={i} className="citem">
-              <span className={cinemaClass(c.type)}>{c.name}{c.note ?? ''}</span>
-              {url && (
-                <a href={url} target="_blank" rel="noopener noreferrer" className="clink" title="Page AlloCiné du cinéma" onClick={e => e.stopPropagation()}>↗</a>
-              )}
-            </span>
-          )
-        })}
+        {group.map((c, i) => <CinemaBadge key={i} c={c} />)}
       </div>
     )
   }

@@ -190,6 +190,10 @@ small.o { font-style: italic; }
 .c.cs { cursor: pointer; }
 .c.cs:hover { opacity: .85; }
 
+/* Badge-as-link: override <a> defaults, keep badge colors */
+a.cb { text-decoration: none; cursor: pointer; }
+a.cb:hover { opacity: .82; }
+
 /* Cinema column top — badges + toggle button */
 .ci-top {
   display: flex;
