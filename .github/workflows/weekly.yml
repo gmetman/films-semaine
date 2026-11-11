@@ -25,11 +25,15 @@ jobs:
 
       - run: npm ci
 
+      - name: Create .env.local from secrets
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
+          echo "APP_URL=${{ secrets.APP_URL }}" >> .env.local
+          echo "REVALIDATE_SECRET=${{ secrets.REVALIDATE_SECRET }}" >> .env.local
+
       - name: Run scraper
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           DATE="${{ github.event.inputs.week_date }}"
           if [ -n "$DATE" ]; then
