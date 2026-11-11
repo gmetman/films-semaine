@@ -229,6 +229,7 @@ small.o { font-style: italic; }
   gap: 5px;
   font-size: 11px;
 }
+.showt-cname { font-weight: 600; color: var(--fg); white-space: nowrap; }
 .showt-times { color: var(--fg); }
 .showt-sep { color: var(--mut); }
 .showt-ver { color: var(--mut); font-weight: 600; }

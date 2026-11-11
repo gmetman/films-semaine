@@ -72,7 +72,7 @@ export default function CinemaBadges({ cinemas }: { cinemas: Cinema[] }) {
               const multiVer = versions.length > 1
               return (
                 <div key={i} className="showt-row">
-                  <span className={cinemaClass(c.type)}>{c.name}{c.note ?? ''}</span>
+                  <span className="showt-cname">{c.name}</span>
                   <span className="showt-times">
                     {versions.map(([ver, times], vi) => (
                       <span key={ver}>
