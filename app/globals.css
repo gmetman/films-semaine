@@ -215,12 +215,11 @@ small.o { font-style: italic; }
 }
 .showt-toggle:hover { border-color: var(--ac); color: var(--ac); }
 
-/* One-line-per-cinema showtime rows */
-.showt-all {
+/* Expanded mode: one row per cinema */
+.showt-expanded {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 5px 0 2px;
 }
 .showt-row {
   display: flex;
@@ -229,7 +228,6 @@ small.o { font-style: italic; }
   gap: 5px;
   font-size: 11px;
 }
-.showt-cname { font-weight: 600; color: var(--fg); white-space: nowrap; }
 .showt-times { color: var(--fg); }
 .showt-sep { color: var(--mut); }
 .showt-ver { color: var(--mut); font-weight: 600; }

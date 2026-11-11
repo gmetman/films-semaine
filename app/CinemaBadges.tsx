@@ -14,78 +14,81 @@ function cinemaClass(type: Cinema['type']): string {
   return 'c o'
 }
 
-function BadgeGroup({ cinemas }: { cinemas: Cinema[] }) {
-  if (cinemas.length === 0) return null
-  return (
-    <div className="cgrp">
-      {cinemas.map((c, i) => (
-        <span key={i} className="citem">
-          <span className={cinemaClass(c.type)}>
-            {c.name}{c.note ?? ''}
-          </span>
-          {(c.allocine_url ?? CINEMA_URL[c.name]) && (
-            <a
-              href={c.allocine_url ?? CINEMA_URL[c.name]}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="clink"
-              title="Page AlloCiné du cinéma"
-              onClick={e => e.stopPropagation()}
-            >↗</a>
-          )}
-        </span>
-      ))}
-    </div>
-  )
-}
-
 export default function CinemaBadges({ cinemas }: { cinemas: Cinema[] }) {
   const [open, setOpen] = useState(false)
 
   const hasAnyShowtimes = cinemas.some(c => c.showtimes && Object.keys(c.showtimes).length > 0)
+
+  if (open) {
+    // Expanded: one row per cinema — badge + link + times on the same line
+    return (
+      <div className="showt-expanded">
+        <button className="showt-toggle" onClick={() => setOpen(false)}>Horaires ▲</button>
+        {cinemas.map((c, i) => {
+          const url = c.allocine_url ?? CINEMA_URL[c.name]
+          const versions = c.showtimes ? Object.entries(c.showtimes) : []
+          const multiVer = versions.length > 1
+          return (
+            <div key={i} className="showt-row">
+              <span className="citem">
+                <span className={cinemaClass(c.type)}>{c.name}{c.note ?? ''}</span>
+                {url && (
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="clink" title="Page AlloCiné du cinéma" onClick={e => e.stopPropagation()}>↗</a>
+                )}
+              </span>
+              {versions.length > 0 && (
+                <span className="showt-times">
+                  {versions.map(([ver, times], vi) => (
+                    <span key={ver}>
+                      {vi > 0 && <span className="showt-sep"> / </span>}
+                      {multiVer && <span className="showt-ver">{ver}: </span>}
+                      {times.join(' · ')}
+                    </span>
+                  ))}
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // Collapsed: badges grouped by type, all inline
   const pathe  = cinemas.filter(c => c.type === 'pathe')
   const ugc    = cinemas.filter(c => c.type === 'ugc')
   const mk2    = cinemas.filter(c => c.type === 'mk2')
   const others = cinemas.filter(c => c.type !== 'pathe' && c.type !== 'ugc' && c.type !== 'mk2')
 
-  return (
-    <div>
-      <div className="ci-top">
-        <div className="ci-badges">
-          <BadgeGroup cinemas={pathe} />
-          <BadgeGroup cinemas={ugc} />
-          <BadgeGroup cinemas={mk2} />
-          <BadgeGroup cinemas={others} />
-        </div>
-        {hasAnyShowtimes && (
-          <button className="showt-toggle" onClick={() => setOpen(o => !o)}>
-            Horaires {open ? '▲' : '▼'}
-          </button>
-        )}
+  function BadgeGroup({ group }: { group: Cinema[] }) {
+    if (group.length === 0) return null
+    return (
+      <div className="cgrp">
+        {group.map((c, i) => {
+          const url = c.allocine_url ?? CINEMA_URL[c.name]
+          return (
+            <span key={i} className="citem">
+              <span className={cinemaClass(c.type)}>{c.name}{c.note ?? ''}</span>
+              {url && (
+                <a href={url} target="_blank" rel="noopener noreferrer" className="clink" title="Page AlloCiné du cinéma" onClick={e => e.stopPropagation()}>↗</a>
+              )}
+            </span>
+          )
+        })}
       </div>
-      {open && (
-        <div className="showt-all">
-          {cinemas
-            .filter(c => c.showtimes && Object.keys(c.showtimes).length > 0)
-            .map((c, i) => {
-              const versions = Object.entries(c.showtimes!)
-              const multiVer = versions.length > 1
-              return (
-                <div key={i} className="showt-row">
-                  <span className="showt-cname">{c.name}</span>
-                  <span className="showt-times">
-                    {versions.map(([ver, times], vi) => (
-                      <span key={ver}>
-                        {vi > 0 && <span className="showt-sep"> / </span>}
-                        {multiVer && <span className="showt-ver">{ver}: </span>}
-                        {times.join(' · ')}
-                      </span>
-                    ))}
-                  </span>
-                </div>
-              )
-            })}
-        </div>
+    )
+  }
+
+  return (
+    <div className="ci-top">
+      <div className="ci-badges">
+        <BadgeGroup group={pathe} />
+        <BadgeGroup group={ugc} />
+        <BadgeGroup group={mk2} />
+        <BadgeGroup group={others} />
+      </div>
+      {hasAnyShowtimes && (
+        <button className="showt-toggle" onClick={() => setOpen(true)}>Horaires ▼</button>
       )}
     </div>
   )
