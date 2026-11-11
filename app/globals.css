@@ -31,6 +31,8 @@ body {
 
 h1 { font-size: 20px; margin: 0 0 2px; }
 p.s { color: var(--mut); margin: 0 0 12px; }
+.h1-short { display: none; }
+.sub-week-short { display: none; }
 
 .w { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; min-width: 960px; }
@@ -344,3 +346,46 @@ a.film-title-link:hover { color: var(--ac); }
   line-height: 1;
 }
 .clink:hover { opacity: 1; color: var(--ac); }
+
+/* ── Mobile portrait ────────────────────────────────────────────── */
+@media (max-width: 600px) {
+
+  /* Compact header */
+  .film h1 { font-size: 15px; letter-spacing: 0; }
+  .h1-long { display: none; }
+  .sub-detail { display: none; }
+  .sub-week-long { display: none; }
+  .sub-week-short { display: inline; }
+  .perf { display: none; }
+  .ttl { padding: 6px 10px; }
+
+  /* Table → one card per film */
+  .w { overflow-x: unset; }
+  table { display: block; min-width: unset; width: 100%; }
+  thead { display: none; }
+  tbody { display: block; }
+
+  tr {
+    display: grid;
+    grid-template-columns: 64px 1fr 1fr;
+    grid-template-areas:
+      "poster score   famille"
+      "poster film    cinemas"
+      "poster dir     prizes";
+    border-bottom: 1px solid var(--ln);
+    padding: 6px 4px;
+    gap: 5px 8px;
+  }
+
+  td { padding: 0; border: none; }
+  td.pc { grid-area: poster; padding-right: 4px; }
+  td.sc { grid-area: score; }
+  td.b  { grid-area: famille; }
+  td.t  { grid-area: film; }
+  td.ci { grid-area: cinemas; }
+  td.pr { grid-area: prizes; }
+  td.dr { grid-area: dir; }
+
+  /* Keep filter-neg working on mobile (now on tr not on td) */
+  .filter-neg tr:has([data-neg="true"]) { display: none; }
+}

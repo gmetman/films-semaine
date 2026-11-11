@@ -206,6 +206,15 @@ function formatWeekLabel(isoDate: string): string {
   return `Semaine du mercredi ${fmt.format(d)} au mardi ${fmtEnd.format(end)}`
 }
 
+function formatWeekLabelShort(isoDate: string): string {
+  const d = new Date(isoDate + 'T12:00:00')
+  const end = new Date(d)
+  end.setDate(d.getDate() + 6)
+  const fmtD = new Intl.DateTimeFormat('fr-FR', { day: 'numeric' })
+  const fmtE = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+  return `${fmtD.format(d)}–${fmtE.format(end)}`
+}
+
 
 async function getFilms(): Promise<{ films: Film[]; weekDate: string }> {
   const weekDate = getWeekDate()
@@ -231,6 +240,7 @@ export default async function Page() {
   const { films, weekDate } = await getFilms()
 
   const weekLabel = formatWeekLabel(weekDate)
+  const weekLabelShort = formatWeekLabelShort(weekDate)
   const dateFormatted = new Date(weekDate + 'T12:00:00').toLocaleDateString('fr-FR', {
     day: 'numeric', month: 'long', year: 'numeric',
   })
@@ -241,9 +251,11 @@ export default async function Page() {
         <div className="perf" />
         <div className="ttl">
           <div className="ttl-left">
-            <h1>🎬 FILMS À VOIR CETTE SEMAINE</h1>
+            <h1>🎬 <span className="h1-short">Films</span><span className="h1-long">FILMS À VOIR CETTE SEMAINE</span></h1>
             <span className="sub">
-              {weekLabel} · vos cinémas · hors épouvante/horreur · tri par note combinée
+              <span className="sub-week-long">{weekLabel}</span>
+              <span className="sub-week-short">{weekLabelShort}</span>
+              <span className="sub-detail"> · vos cinémas · hors épouvante/horreur · tri par note combinée</span>
             </span>
           </div>
           <ProfileSelector />
@@ -327,15 +339,15 @@ export default async function Page() {
                     </td>
 
                     {/* Cinemas */}
-                    <td>
+                    <td className="ci">
                       <CinemaBadges cinemas={film.cinemas as Cinema[]} />
                     </td>
 
                     {/* Prizes */}
-                    <td>{film.prizes ? <PrizeLabel text={film.prizes} /> : <span className="n">—</span>}</td>
+                    <td className="pr">{film.prizes ? <PrizeLabel text={film.prizes} /> : <span className="n">—</span>}</td>
 
                     {/* Director / Actors */}
-                    <td>
+                    <td className="dr">
                       {film.director}
                       {film.actors.length > 0 && <small>{film.actors.join(', ')}</small>}
                     </td>
