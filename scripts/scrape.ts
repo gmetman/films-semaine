@@ -170,19 +170,39 @@ function parseFilmCard($: cheerio.CheerioAPI, card: cheerio.Element): FilmEntry 
   if (!title) return null
 
   const metaInfo = $card.find('.meta-body-info').text().trim()
-  // Format: "04 novembre 2026 | 1h 58min | Thriller | Grande-Bretagne, U.S.A., Chili"
+  // Old format: "04 novembre 2026 | 1h 58min | Thriller | Grande-Bretagne, U.S.A., Chili"
+  // New format: "11 novembre 2026 | Drame, Historique / France , Italie"
   const metaParts = metaInfo.split('|').map(s => s.trim())
 
   const dateStr = metaParts[0] || ''
   const yearMatch = dateStr.match(/(\d{4})/)
   const year = yearMatch ? parseInt(yearMatch[1]) : null
 
-  const duration = metaParts[1] || null
+  let duration: string | null = null
+  let genreStr = ''
+  let countryStr = ''
 
-  const genreStr = metaParts[2] || ''
+  const part1 = metaParts[1] || ''
+  if (/^\d+h/.test(part1)) {
+    // Old format: duration at [1], genres at [2], countries at [3]
+    duration = part1
+    const part2 = metaParts[2] || ''
+    if (part2.includes('/')) {
+      const [g, c] = part2.split('/').map(s => s.trim())
+      genreStr = g; countryStr = c || ''
+    } else {
+      genreStr = part2; countryStr = metaParts[3] || ''
+    }
+  } else if (part1.includes('/')) {
+    // New format: "genres / countries" in one segment
+    const [g, c] = part1.split('/').map(s => s.trim())
+    genreStr = g; countryStr = c || ''
+  } else {
+    // New format without countries (agenda page)
+    genreStr = part1; countryStr = metaParts[2] || ''
+  }
+
   const genres = genreStr ? genreStr.split(',').map(g => g.trim()).filter(Boolean) : []
-
-  const countryStr = metaParts[3] || ''
   const countries = countryStr ? countryStr.split(',').map(c => c.trim()).filter(Boolean) : []
 
   const director = $card.find('.meta-body-direction').text().replace(/^De\s+/, '').trim() || null
