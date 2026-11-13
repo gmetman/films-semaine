@@ -16,19 +16,21 @@ interface Props {
 }
 
 export default function FilmButtons({ allocineId, weekDate }: Props) {
-  const { prefs, voteCounts, setChoice } = useProfile()
+  const { prefs, voteCounts, profileVotes, activeProfiles, setChoice } = useProfile()
   const myChoice = prefs[allocineId]
   const counts = voteCounts[allocineId] ?? {}
+  const pv = profileVotes[allocineId] ?? {}
 
-  const globalScore = Object.entries(counts).reduce(
-    (acc, [c, n]) => acc + (WEIGHTS[c as Choice] ?? 0) * (n ?? 0), 0,
+  // Score only from active profiles
+  const globalScore = Array.from(activeProfiles).reduce(
+    (acc, p) => acc + (pv[p] ? WEIGHTS[pv[p]!] : 0), 0,
   )
   const scoreLabel = globalScore > 0 ? `+${globalScore}` : `${globalScore}`
   const scoreClass = globalScore > 0 ? 'pos' : globalScore < 0 ? 'neg' : 'zero'
 
-  // Dynamic range: max absolute score across all films
-  const maxAbs = Math.max(1, ...Object.values(voteCounts).map(c =>
-    Math.abs(Object.entries(c ?? {}).reduce((a, [ch, n]) => a + (WEIGHTS[ch as Choice] ?? 0) * (n ?? 0), 0))
+  // Dynamic range: max absolute score across all films, filtered by active profiles
+  const maxAbs = Math.max(1, ...Object.values(profileVotes).map(fv =>
+    Math.abs(Array.from(activeProfiles).reduce((a, p) => a + (fv?.[p] ? WEIGHTS[fv[p]!] : 0), 0))
   ))
   const pct = globalScore === 0 ? 0 : Math.min(Math.abs(globalScore) / maxAbs, 1) * 50
 

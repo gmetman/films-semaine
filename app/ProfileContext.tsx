@@ -7,6 +7,7 @@ export type Profile = typeof PROFILES[number]
 export type Choice = 'prefere' | 'pourquoi_pas' | 'vu' | 'no'
 export type Prefs = Record<string, Choice>
 export type VoteCounts = Record<string, Partial<Record<Choice, number>>>
+export type ProfileVotes = Record<string, Partial<Record<Profile, Choice>>>
 
 export const PROFILE_EMAILS: Record<string, Profile> = {
   'guillaume.metman@ensta.org': 'Guillaume',
@@ -21,6 +22,9 @@ interface ProfileCtxValue {
   setSelected: (p: Profile) => void
   prefs: Prefs
   voteCounts: VoteCounts
+  profileVotes: ProfileVotes
+  activeProfiles: Set<Profile>
+  toggleProfile: (p: Profile) => void
   filterNegative: boolean
   setFilterNegative: (v: boolean) => void
   setChoice: (allocineId: string, weekDate: string, choice: Choice | null) => Promise<void>
@@ -46,6 +50,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [selected, setSelectedState] = useState<Profile>('Guillaume')
   const [prefs, setPrefs] = useState<Prefs>({})
   const [voteCounts, setVoteCounts] = useState<VoteCounts>({})
+  const [profileVotes, setProfileVotes] = useState<ProfileVotes>({})
+  const [activeProfiles, setActiveProfiles] = useState<Set<Profile>>(new Set(PROFILES))
   const [filterNegative, setFilterNegative] = useState(false)
   const prefsRef = useRef<Prefs>({})
   prefsRef.current = prefs
@@ -86,22 +92,35 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const weekDate = getWeekDate()
     sb.from('user_preferences')
-      .select('allocine_id, choice')
+      .select('allocine_id, choice, profile')
       .eq('week_date', weekDate)
       .then(({ data }) => {
         const counts: VoteCounts = {}
+        const pv: ProfileVotes = {}
         for (const row of data ?? []) {
           if (!counts[row.allocine_id]) counts[row.allocine_id] = {}
           const c = row.choice as Choice
           counts[row.allocine_id][c] = (counts[row.allocine_id][c] ?? 0) + 1
+          if (!pv[row.allocine_id]) pv[row.allocine_id] = {}
+          pv[row.allocine_id][row.profile as Profile] = c
         }
         setVoteCounts(counts)
+        setProfileVotes(pv)
       })
   }, [])
 
   const setSelected = useCallback((p: Profile) => {
     setSelectedState(p)
     try { localStorage.setItem('films_profile', p) } catch {}
+  }, [])
+
+  const toggleProfile = useCallback((p: Profile) => {
+    setActiveProfiles(prev => {
+      const next = new Set(prev)
+      if (next.has(p)) next.delete(p)
+      else next.add(p)
+      return next
+    })
   }, [])
 
   const setChoice = useCallback(async (allocineId: string, weekDate: string, choice: Choice | null) => {
@@ -133,6 +152,14 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       if (choice) film[choice] = (film[choice] ?? 0) + 1
       return { ...prev, [allocineId]: film }
     })
+
+    // Update profileVotes optimistically
+    setProfileVotes(prev => {
+      const film = { ...(prev[allocineId] ?? {}) }
+      if (choice === null) delete film[selected]
+      else film[selected] = choice
+      return { ...prev, [allocineId]: film }
+    })
   }, [selected])
 
   const clearAll = useCallback(async (weekDate: string) => {
@@ -151,11 +178,21 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       }
       return next
     })
+    setProfileVotes(prev => {
+      const next = { ...prev }
+      for (const id of Object.keys(currentPrefs)) {
+        if (next[id]) {
+          next[id] = { ...next[id] }
+          delete next[id][selected]
+        }
+      }
+      return next
+    })
     setPrefs({})
   }, [selected])
 
   return (
-    <ProfileCtx.Provider value={{ selected, setSelected, prefs, voteCounts, filterNegative, setFilterNegative, setChoice, clearAll }}>
+    <ProfileCtx.Provider value={{ selected, setSelected, prefs, voteCounts, profileVotes, activeProfiles, toggleProfile, filterNegative, setFilterNegative, setChoice, clearAll }}>
       {children}
     </ProfileCtx.Provider>
   )

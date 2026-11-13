@@ -350,6 +350,39 @@ a.cb:hover { opacity: .82; }
 .filter-btn:hover { border-color: var(--ac); color: var(--ac); }
 .filter-btn.active { background: var(--ac); border-color: var(--ac); color: #fff; }
 
+/* Score famille header with profile filter chips */
+.sf-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+.sf-profiles {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.sf-pill {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  background: none;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.9;
+  transition: opacity .15s;
+}
+.sf-pill:hover { opacity: 1; }
+.sf-pill.sf-on { color: #fff; }
+
 /* Hide rows with negative/zero family score when filter is active */
 .filter-neg tr:has([data-neg="true"]) { display: none; }
 

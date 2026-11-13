@@ -6,6 +6,7 @@ import ProfileSelector from './ProfileSelector'
 import CinemaBadges from './CinemaBadges'
 import FilterButton from './FilterButton'
 import FilmTableWrapper from './FilmTableWrapper'
+import ScoreFamilleHeader from './ScoreFamilleHeader'
 
 
 export const revalidate = 300
@@ -272,7 +273,7 @@ export default async function Page() {
               <tr>
                 <th></th>
                 <th>Note /5<br />(P presse · S spect.)</th>
-                <th>Score famille <FilterButton /></th>
+                <th><ScoreFamilleHeader /></th>
                 <th>Film</th>
                 <th>
                   Cinémas{' '}
