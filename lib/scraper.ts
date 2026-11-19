@@ -1,9 +1,9 @@
 import * as cheerio from 'cheerio'
 import type { Element } from 'domhandler'
 import { createClient } from '@supabase/supabase-js'
-import { CINEMAS, EXCLUDED_GENRES, type CinemaConfig } from './cinemas.js'
-import { calculateCombinedScore, getScoreTier, type ScoreTier } from './scoring.js'
-import type { Film, Cinema } from './types.js'
+import { CINEMAS, EXCLUDED_GENRES, type CinemaConfig } from './cinemas'
+import { calculateCombinedScore, getScoreTier, type ScoreTier } from './scoring'
+import type { Film, Cinema } from './types'
 
 const ALLOCINE_BASE = 'https://www.allocine.fr'
 const POSTER_SIZE = 'c_160_213'
